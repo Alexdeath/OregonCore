@@ -12,7 +12,7 @@
 * more details.
 *
 * You should have received a copy of the GNU General Public License along
-* with this program. If not, see <http://www.gnu.org/licenses/>.
+* with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "DatabaseEnv.h"
@@ -104,7 +104,7 @@ void SmartAIMgr::LoadSmartAIFromDB()
     for (uint8 i = 0; i < SMART_SCRIPT_TYPE_MAX; i++)
         mEventMap[i].clear();  //Drop Existing SmartAI List
 
-    QueryResult_AutoPtr result = WorldDatabase.Query("SELECT entryorguid, source_type, id, link, event_type, event_phase_mask, event_chance, event_flags, event_param1, event_param2, event_param3, event_param4, action_type, action_param1, action_param2, action_param3, action_param4, action_param5, action_param6, target_type, target_param1, target_param2, target_param3, target_x, target_y, target_z, target_o FROM smart_scripts ORDER BY entryorguid, source_type, id, link");
+    QueryResult_AutoPtr result = WorldDatabase.Query("SELECT entryorguid, source_type, id, link, event_type, event_phase_mask, event_chance, event_flags, event_param1, event_param2, event_param3, event_param4, event_param5, action_type, action_param1, action_param2, action_param3, action_param4, action_param5, action_param6, target_type, target_param1, target_param2, target_param3, target_x, target_y, target_z, target_o FROM smart_scripts ORDER BY entryorguid, source_type, id, link");
 
     if (!result)
     {
@@ -215,22 +215,24 @@ void SmartAIMgr::LoadSmartAIFromDB()
         temp.event.raw.param3 = fields[10].GetUInt32();
         temp.event.raw.param4 = fields[11].GetUInt32();
 
-        temp.action.type = (SMART_ACTION)fields[12].GetUInt8();
-        temp.action.raw.param1 = fields[13].GetUInt32();
-        temp.action.raw.param2 = fields[14].GetUInt32();
-        temp.action.raw.param3 = fields[15].GetUInt32();
-        temp.action.raw.param4 = fields[16].GetUInt32();
-        temp.action.raw.param5 = fields[17].GetUInt32();
-        temp.action.raw.param6 = fields[18].GetUInt32();
+        temp.event.raw.param5 = fields[12].GetUInt32();
 
-        temp.target.type = (SMARTAI_TARGETS)fields[19].GetUInt8();
-        temp.target.raw.param1 = fields[20].GetUInt32();
-        temp.target.raw.param2 = fields[21].GetUInt32();
-        temp.target.raw.param3 = fields[22].GetUInt32();
-        temp.target.x = fields[23].GetFloat();
-        temp.target.y = fields[24].GetFloat();
-        temp.target.z = fields[25].GetFloat();
-        temp.target.o = fields[26].GetFloat();
+        temp.action.type = (SMART_ACTION)fields[13].GetUInt8();
+        temp.action.raw.param1 = fields[14].GetUInt32();
+        temp.action.raw.param2 = fields[15].GetUInt32();
+        temp.action.raw.param3 = fields[16].GetUInt32();
+        temp.action.raw.param4 = fields[17].GetUInt32();
+        temp.action.raw.param5 = fields[18].GetUInt32();
+        temp.action.raw.param6 = fields[19].GetUInt32();
+
+        temp.target.type = (SMARTAI_TARGETS)fields[20].GetUInt8();
+        temp.target.raw.param1 = fields[21].GetUInt32();
+        temp.target.raw.param2 = fields[22].GetUInt32();
+        temp.target.raw.param3 = fields[23].GetUInt32();
+        temp.target.x = fields[24].GetFloat();
+        temp.target.y = fields[25].GetFloat();
+        temp.target.z = fields[26].GetFloat();
+        temp.target.o = fields[27].GetFloat();
 
         //check target
         if (!IsTargetValid(temp))
@@ -822,6 +824,13 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
 
             if (e.action.randomEmote.emote6 && !IsEmoteValid(e, e.action.randomEmote.emote6))
                 return false;
+            break;
+        case SMART_ACTION_RANDOM_SOUND:
+            for (uint8 i = 0; i < SMART_ACTION_PARAM_COUNT - 1; i++)
+            {
+                if (e.action.randomSound.sound[i] && !IsSoundValid(e, e.action.randomSound.sound[i]))
+                    return false;
+            }
             break;
         case SMART_ACTION_CAST:
         {

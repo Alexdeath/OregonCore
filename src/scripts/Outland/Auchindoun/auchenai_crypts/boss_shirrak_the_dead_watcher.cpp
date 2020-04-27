@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -71,7 +71,7 @@ struct boss_shirrak_the_dead_watcherAI : public ScriptedAI
         if (summoned && summoned->GetEntry() == ENTRY_FOCUS_FIRE)
         {
             summoned->CastSpell(summoned, SPELL_FOCUS_FIRE_VISUAL, false);
-            summoned->setFaction(me->getFaction());
+            summoned->SetFaction(me->GetFaction());
             summoned->SetLevel(me->getLevel());
             summoned->AddUnitState(UNIT_STATE_ROOT);
 

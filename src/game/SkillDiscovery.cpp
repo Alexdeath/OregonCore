@@ -12,14 +12,14 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
 #include "ObjectAccessor.h"
 #include "World.h"
-#include "Util.h"
+#include "Utilities/Util.h"
 #include "SkillDiscovery.h"
 #include "SpellMgr.h"
 #include <map>

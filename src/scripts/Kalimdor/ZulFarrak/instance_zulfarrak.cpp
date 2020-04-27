@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "ScriptMgr.h"
@@ -382,7 +382,7 @@ struct instance_zulfarrak : public ScriptedInstance
             crew->SetWalk(true);
             crew->SetHomePosition(x, y, z, 0);
             crew->GetMotionMaster()->MovePoint(1, x, y, z);
-            crew->setFaction(FACTION_FREED);
+            crew->SetFaction(FACTION_FREED);
         }
     }
 };

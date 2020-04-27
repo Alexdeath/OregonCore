@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef _MASTER_H
@@ -20,6 +20,7 @@
 
 #include "Common.h"
 #include "Policies/Singleton.h"
+#include "RegressionTests/RegressionTest.h"
 
 // Start the server
 class Master
@@ -27,9 +28,10 @@ class Master
     public:
         Master();
         ~Master();
-        int Run();
+        int Run(bool runTests);
         static volatile uint32 m_masterLoopCounter;
 
+        bool RunRegressionTests();
     private:
         void _StartDB();
 
@@ -37,9 +39,9 @@ class Master
         void _UnhookSignals();
         static void _OnSignal(int s);
 
+        void MainLoop();
         void clearOnlineAccounts();
 };
 
 #define sMaster Oregon::Singleton<Master>::Instance()
 #endif
-

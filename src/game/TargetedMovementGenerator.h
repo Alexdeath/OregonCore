@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef OREGON_TARGETEDMOVEMENTGENERATOR_H
@@ -95,8 +95,9 @@ public:
     void Reset(T&);
     void MovementInform(T&);
 
-    bool EnableWalking() const { return false; }
+    bool EnableWalking(T&) const { return false; }
     void _reachTarget(T&);
+    void _updateSpeed(T&) {}
 };
 
 template<class T>
@@ -116,11 +117,9 @@ public:
     void Reset(T&);
     void MovementInform(T&);
 
-    bool EnableWalking() const;
+    bool EnableWalking(T&) const;
     void _reachTarget(T&) {}
-
-private:
-    void _updateSpeed(T& u);
+    void _updateSpeed(T&);
 };
 
 #endif

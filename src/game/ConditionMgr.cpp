@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Player.h"
@@ -616,7 +616,6 @@ void ConditionMgr::LoadConditions(bool isReload)
 
     if (!result)
     {
-        sLog.outString();
         sLog.outErrorDb(">> Loaded `conditions`, table is empty!");
         return;
     }
@@ -815,7 +814,6 @@ void ConditionMgr::LoadConditions(bool isReload)
     }
     while (result->NextRow());
 
-    sLog.outString();
     sLog.outString(">> Loaded %u conditions", count);
 }
 
@@ -861,9 +859,9 @@ bool ConditionMgr::addToGossipMenuItems(Condition* cond)
     {
         for (GossipMenuItemsMap::iterator itr = pMenuItemBounds.first; itr != pMenuItemBounds.second; ++itr)
         {
-            if ((*itr).second.menu_id == cond->SourceGroup && (*itr).second.id == cond->SourceEntry)
+            if ((*itr).second.MenuId == cond->SourceGroup && (*itr).second.OptionIndex == cond->SourceEntry)
             {
-                (*itr).second.conditions.push_back(cond);
+                (*itr).second.Conditions.push_back(cond);
                 return true;
             }
         }

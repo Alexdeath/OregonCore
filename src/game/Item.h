@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef OREGONCORE_ITEM_H
@@ -218,10 +218,7 @@ class Item : public Object
         void SetBinding(bool val) { ApplyModFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_SOULBOUND, val); }
         bool IsSoulBound() const { return HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAG_SOULBOUND); }
 
-        bool IsBindedNotWith(uint64 guid) const
-        {
-            return IsSoulBound() && GetOwnerGUID() != guid;
-        }
+        bool IsBindedNotWith(Player const* player) const;
         bool IsBoundByEnchant() const;
         virtual void SaveToDB();
         virtual bool LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields);

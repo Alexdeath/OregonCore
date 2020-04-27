@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Database/DatabaseEnv.h"
@@ -20,7 +20,7 @@
 #include "AccountMgr.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
-#include "Util.h"
+#include "Utilities/Util.h"
 #include "Auth/Sha1.h"
 
 extern DatabaseType LoginDatabase;
@@ -46,8 +46,9 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
     if (result)
         return AOR_NAME_ALREDY_EXIST;                       // username does already exist
 
-    if (!LoginDatabase.PExecute("INSERT INTO account(username,sha_pass_hash,joindate) VALUES('%s',SHA1(CONCAT('%s',':','%s')),NOW())", username.c_str(), username.c_str(), password.c_str()))
+    if (!LoginDatabase.PExecute("INSERT INTO account(username,sha_pass_hash,joindate, expansion) VALUES('%s',SHA1(CONCAT('%s',':','%s')),NOW(), 1)", username.c_str(), username.c_str(), password.c_str()))
         return AOR_DB_INTERNAL_ERROR;                       // unexpected error
+    
     LoginDatabase.Execute("INSERT INTO realmcharacters (realmid, acctid, numchars) SELECT realmlist.id, account.id, 0 FROM realmlist,account LEFT JOIN realmcharacters ON acctid=account.id WHERE acctid IS NULL");
 
     return AOR_OK;                                          // everything's fine

@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "SocialMgr.h"
@@ -24,7 +24,7 @@
 #include "ObjectMgr.h"
 #include "MapManager.h"
 #include "World.h"
-#include "Util.h"
+#include "Utilities/Util.h"
 
 INSTANTIATE_SINGLETON_1(SocialMgr);
 

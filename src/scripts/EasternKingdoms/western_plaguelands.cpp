@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -48,9 +48,9 @@ EndContentData */
 
 bool GossipHello_npcs_dithers_and_arbington(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetGUID());
-    if (pCreature->isVendor())
+    if (pCreature->IsVendor())
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
 
     if (pPlayer->GetQuestRewardStatus(5237) || pPlayer->GetQuestRewardStatus(5238))
@@ -113,7 +113,7 @@ enum eMyranda
 
 bool GossipHello_npc_myranda_the_hag(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
     if (pPlayer->GetQuestStatus(QUEST_SUBTERFUGE) == QUEST_STATUS_COMPLETE &&
@@ -413,6 +413,6 @@ void AddSC_western_plaguelands()
     newscript = new Script;
     newscript->Name = "npc_anchorite_truuen";
     newscript->GetAI = &GetAI_npc_anchorite_truuen;
-    newscript->pQuestAccept =  &QuestAccept_npc_anchorite_truuen;
+    newscript->QuestAccept =  &QuestAccept_npc_anchorite_truuen;
     newscript->RegisterSelf();
 }

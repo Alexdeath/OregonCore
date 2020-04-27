@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "MotionMaster.h"
@@ -324,6 +324,9 @@ void MotionMaster::MoveFall(float z, uint32 id)
         if (fabs(i_owner->GetPositionZ() - z) < 0.1f)
             return;
     }
+
+    if (i_owner->HasUnitState(UNIT_STATE_ROOT))
+        return;
 
     i_owner->AddUnitMovementFlag(MOVEMENTFLAG_FALLING);
 

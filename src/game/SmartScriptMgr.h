@@ -12,7 +12,7 @@
 * more details.
 *
 * You should have received a copy of the GNU General Public License along
-* with this program. If not, see <http://www.gnu.org/licenses/>.
+* with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 #ifndef OREGON_SMARTSCRIPTMGR_H
@@ -413,6 +413,7 @@ struct SmartEvent
             uint32 param2;
             uint32 param3;
             uint32 param4;
+            uint32 param5;
         } raw;
     };
 };
@@ -541,8 +542,10 @@ enum SMART_ACTION
     SMART_ACTION_GAME_EVENT_STOP                    = 111,    // GameEventId
     SMART_ACTION_GAME_EVENT_START                   = 112,    // GameEventId
     SMART_ACTION_START_CLOSEST_WAYPOINT             = 113,    // wp1, wp2, wp3, wp4, wp5, wp6, wp7
+    SMART_ACTION_MOVE_OFFSET                        = 114,
+    SMART_ACTION_RANDOM_SOUND                       = 115,    // SoundId1, SoundId2, SoundId3, SoundId4, SoundId5, onlySelf
 
-    SMART_ACTION_END                                = 114
+    SMART_ACTION_END                                = 116
 };
 
 struct SmartAction
@@ -573,6 +576,7 @@ struct SmartAction
         {
             uint32 sound;
             uint32 onlySelf;
+            uint32 distance;
         } sound;
 
         struct
@@ -1017,6 +1021,12 @@ struct SmartAction
             uint32 wp5;
             uint32 wp6;
         } closestWaypointFromList;
+
+        struct
+        {
+            uint32 sound[5];
+            uint32 onlySelf;
+        } randomSound;
 
         //! Note for any new future actions
         //! All parameters must have type uint32

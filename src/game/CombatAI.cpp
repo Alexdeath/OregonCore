@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "CombatAI.h"
@@ -21,7 +21,7 @@
 int AggressorAI::Permissible(const Creature* creature)
 {
     // have some hostile factions, it will be selected by IsHostileTo check at MoveInLineOfSight
-    if (!creature->isCivilian() && !creature->IsNeutralToAll())
+    if (!creature->IsCivilian() && !creature->IsNeutralToAll())
         return PERMIT_BASE_PROACTIVE;
 
     return PERMIT_BASE_NO;

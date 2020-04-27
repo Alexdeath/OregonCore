@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Common.h"
@@ -48,9 +48,13 @@ void WorldSession::SendTaxiStatus(uint64 guid)
     }
 
     uint32 curloc = sObjectMgr.GetNearestTaxiNode(unit->GetPositionX(), unit->GetPositionY(), unit->GetPositionZ(), unit->GetMapId());
-
     // not found nearest
     if (curloc == 0)
+        return;
+
+    uint16 MountId = sObjectMgr.GetTaxiMount(curloc, GetPlayer()->GetTeam());
+    // no mount for faction == not supposed to learn fp
+    if (MountId == 0)
         return;
 
     DEBUG_LOG("WORLD: current location %u ", curloc);
@@ -186,33 +190,11 @@ void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& recv_data)
     recv_data >> movementInfo;
     recv_data >> Unused<uint32>();                          // unk
 
-    // in taxi flight packet received in 2 case:
-    // 1) end taxi path in far (multi-node) flight
-    // 2) switch from one map to other in case multim-map taxi path
-    // we need process only (1)
+    // in taxi flight packet received at the end of current path in far (multi-node) flight
 
     uint32 curDest = GetPlayer()->m_taxi.GetTaxiDestination();
     if (!curDest)
         return;
-
-    TaxiNodesEntry const* curDestNode = sTaxiNodesStore.LookupEntry(curDest);
-
-    // far teleport case
-    if (curDestNode && curDestNode->map_id != GetPlayer()->GetMapId())
-    {
-        if (GetPlayer()->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE)
-        {
-            // short preparations to continue flight
-            FlightPathMovementGenerator* flight = (FlightPathMovementGenerator*)(GetPlayer()->GetMotionMaster()->top());
-
-            flight->SetCurrentNodeAfterTeleport();
-            TaxiPathNodeEntry const& node = flight->GetPath()[flight->GetCurrentNode()];
-            flight->SkipCurrentNode();
-
-            GetPlayer()->TeleportTo(curDestNode->map_id, node.x, node.y, node.z, GetPlayer()->GetOrientation());
-        }
-        return;
-    }
 
     uint32 destinationnode = GetPlayer()->m_taxi.NextTaxiDestination();
     if (destinationnode > 0)                              // if more destinations to go
@@ -245,8 +227,12 @@ void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& recv_data)
         return;
     }
     else
+    {
         GetPlayer()->m_taxi.ClearTaxiDestinations();        // not destinations, clear source node
 
+         // has taxi flight just finished reset fall information to avoid receiving fall damage
+        GetPlayer()->SetFallInformation(0, movementInfo.GetPos()->GetPositionZ());
+    }
     GetPlayer()->CleanupAfterTaxiFlight();
 }
 

@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Log.h"
@@ -185,9 +185,9 @@ void TempSummon::InitStats(uint32 duration)
 
     Unit* owner = GetSummoner();
 
-    if (owner && isTrigger() && m_spells[0])
+    if (owner && IsTrigger() && m_spells[0])
     {
-        setFaction(owner->getFaction());
+        SetFaction(owner->GetFaction());
         SetLevel(owner->getLevel());
         if (owner->GetTypeId() == TYPEID_PLAYER)
             m_ControlledByPlayer = true;
@@ -211,7 +211,7 @@ void TempSummon::InitStats(uint32 duration)
     }
 
     if (m_Properties->Faction)
-        setFaction(m_Properties->Faction);
+        SetFaction(m_Properties->Faction);
 }
 
 void TempSummon::InitSummon()
@@ -299,7 +299,7 @@ void Minion::InitStats(uint32 duration)
     SetReactState(REACT_PASSIVE);
 
     SetCreatorGUID(m_owner->GetGUID());
-    setFaction(m_owner->getFaction());
+    SetFaction(m_owner->GetFaction());
 
     m_owner->SetMinion(this, true);
 }
@@ -322,7 +322,7 @@ Guardian::Guardian(SummonPropertiesEntry const* properties, Unit* owner, bool is
     , m_bonusdamage(0)
 {
     m_unitTypeMask |= UNIT_MASK_GUARDIAN;
-    if (properties && properties->Type == SUMMON_TYPE_PET)
+    if (properties && (properties->Type == SUMMON_TYPE_PET || properties->Category == SUMMON_CATEGORY_PET))
     {
         m_unitTypeMask |= UNIT_MASK_CONTROLABLE_GUARDIAN;
         InitCharmInfo();

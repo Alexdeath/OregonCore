@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -643,7 +643,7 @@ struct boss_fathomguard_caribdisAI : public ScriptedAI
             {
                 CAST_CRE(Cyclone)->SetObjectScale(3.0f);
                 Cyclone->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                Cyclone->setFaction(me->getFaction());
+                Cyclone->SetFaction(me->GetFaction());
                 Cyclone->CastSpell(Cyclone, SPELL_CYCLONE_CYCLONE, true);
                 Unit* pTarget = SelectUnit(SELECT_TARGET_RANDOM, 0);
                 if (pTarget)

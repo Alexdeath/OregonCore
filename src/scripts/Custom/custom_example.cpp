@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -249,9 +249,9 @@ void SendDefaultMenu_custom_example(Player* pPlayer, Creature* pCreature, uint32
     if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)               //Fight time
     {
         //Set our faction to hostile twoards all
-        pCreature->setFaction(24);
+        pCreature->SetFaction(24);
         pCreature->Attack(pPlayer, true);
-        pPlayer->PlayerTalkClass->CloseGossip();
+        pPlayer->PlayerTalkClass->SendCloseGossip();
     }
 }
 

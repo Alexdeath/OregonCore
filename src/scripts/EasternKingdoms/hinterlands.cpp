@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -101,7 +101,7 @@ bool QuestAccept_npc_00x09hl(Player* pPlayer, Creature* pCreature, const Quest* 
     if (pQuest->GetQuestId() == QUEST_RESQUE_OOX_09)
     {
         pCreature->SetStandState(UNIT_STAND_STATE_STAND);
-        pCreature->setFaction(113);
+        pCreature->SetFaction(113);
         pCreature->SetHealth(pCreature->GetMaxHealth());
         pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
 
@@ -317,12 +317,12 @@ void AddSC_hinterlands()
     newscript = new Script;
     newscript->Name = "npc_00x09hl";
     newscript->GetAI = &GetAI_npc_00x09hl;
-    newscript->pQuestAccept = &QuestAccept_npc_00x09hl;
+    newscript->QuestAccept = &QuestAccept_npc_00x09hl;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "npc_rinji";
     newscript->GetAI = &GetAI_npc_rinji;
-    newscript->pQuestAccept = &QuestAccept_npc_rinji;
+    newscript->QuestAccept = &QuestAccept_npc_rinji;
     newscript->RegisterSelf();
 }

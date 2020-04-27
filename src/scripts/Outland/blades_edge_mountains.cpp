@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -287,28 +287,23 @@ struct npc_daranelleAI : public ScriptedAI
 {
     npc_daranelleAI(Creature* c) : ScriptedAI(c) {}
 
-    void Reset()
-    {
-    }
+    void Reset() {}
 
-    void EnterCombat(Unit* /*who*/)
-    {
-    }
+    void EnterCombat(Unit* /*who*/) {}
 
     void MoveInLineOfSight(Unit* who)
-    {
-        if (who->GetTypeId() == TYPEID_PLAYER)
-        {
-            if (who->HasAura(36904, 0))
-            {
-                DoScriptText(SAY_DARANELLE, me, who);
-                //@todo Move the below to updateAI and run if this statement == true
-                CAST_PLR(who)->KilledMonsterCredit(21511, me->GetGUID());
-                CAST_PLR(who)->RemoveAurasDueToSpell(36904);
-            }
-        }
+    {      
+		if (Creature* kaliri = me->FindNearestCreature(21468, 15.0f, true))
+			kaliri->ForcedDespawn(1000);
 
-        ScriptedAI::MoveInLineOfSight(who);
+        if (who->HasAura(36904, 0) && who->GetDistance(me) < 15.0f)
+        {
+			me->CastSpell(who, 37028, true);
+            DoScriptText(SAY_DARANELLE, me, who);
+            //@todo Move the below to updateAI and run if this statement == true
+            CAST_PLR(who)->KilledMonsterCredit(21511, me->GetGUID());
+            CAST_PLR(who)->RemoveAurasDueToSpell(36904);			
+        }      
     }
 };
 
@@ -696,7 +691,7 @@ struct npc_bloodmaul_direwolfAI : public ScriptedAI
 	void Reset()
 	{
 		spellHit = false;
-		me->setFaction(1781);
+		me->SetFaction(1781);
 
 		rend_timer = 6000;
 		PlayerGUID = 0;
@@ -726,7 +721,7 @@ struct npc_bloodmaul_direwolfAI : public ScriptedAI
 				if (Creature* pCredit = me->FindNearestCreature(21176, 50, true))
 					pPlayer->KilledMonsterCredit(21176, pCredit->GetGUID());
 
-				me->setFaction(35);
+				me->SetFaction(35);
 				me->CombatStop();
 				spellHit = true;
 				reset_timer = 60000;
@@ -776,7 +771,7 @@ CreatureAI* GetAI_npc_bloodmaul_direwolf(Creature* pCreature)
 
 bool GossipHello_npc_kolphis_darkscale(Player* player, Creature* creature)
 {
-	if (creature->isQuestGiver())
+	if (creature->IsQuestGiver())
 		player->PrepareQuestMenu(creature->GetGUID());
 	if (player->GetQuestStatus(10722) == QUEST_STATUS_INCOMPLETE)
 		player->ADD_GOSSIP_ITEM(0, GOSSIP_ITEM_KOLPHIS1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
@@ -941,7 +936,7 @@ struct npc_koikoi_spiritAI : public ScriptedAI
 	{
 		if (Creature* leafbeard = me->FindNearestCreature(21326, 15.0f, true))
 		{
-			leafbeard->setFaction(35);
+			leafbeard->SetFaction(35);
 			DoScriptText(EMOTE_THANKS, leafbeard);
 		}
 	}
@@ -979,7 +974,7 @@ struct npc_raven_leafbeardAI : public ScriptedAI
 
 	void Reset()
 	{
-		me->setFaction(1846);
+		me->SetFaction(1846);
 		reset_timer = 0;
 		summon_timer = 5000;
 	}
@@ -1185,7 +1180,7 @@ struct npc_evergrove_ancientAI : public ScriptedAI
 	void Reset()
 	{
 		trample_timer = 6000;
-		me->setFaction(113);
+		me->SetFaction(113);
 		me->SetReactState(REACT_AGGRESSIVE);
 	}
 
@@ -1408,7 +1403,7 @@ struct npc_gocAI : public ScriptedAI
 			me->HandleEmoteCommand(ANIM_EMOTE_ROAR);
 			return 10000;
 		case 4:
-			me->setFaction(14);
+			me->SetFaction(14);
 			me->GetMotionMaster()->MovePath(600600600, false);
 			me->SetReactState(REACT_AGGRESSIVE);
 			return 1000;
@@ -1483,7 +1478,7 @@ struct npc_sabelian_humanAI : public ScriptedAI
 
 	void Reset()
 	{
-		me->setFaction(35);
+		me->SetFaction(35);
 		transform_timer = 50000;
 		summoned = false;
 		transformed = false;
@@ -1543,7 +1538,7 @@ struct npc_sabelian_humanAI : public ScriptedAI
 				DoScriptText(YELL_SABELIAN_LINE_3, me);
 				me->HandleEmoteCommand(ANIM_EMOTE_ROAR);
 				me->SetReactState(REACT_AGGRESSIVE);
-				me->setFaction(11);
+				me->SetFaction(11);
 				SayLine2 = true;
 			}
 			else conv_timer -= diff;			
@@ -1589,7 +1584,7 @@ struct npc_sabelian_dragonAI : public ScriptedAI
 		knockdown_timer = 10000;
 		flamebreath_timer = 6000;
 
-		me->setFaction(11);
+		me->SetFaction(11);
 		me->SetReactState(REACT_AGGRESSIVE);
 	}
 
@@ -1641,7 +1636,7 @@ struct npc_rexxarAI : public ScriptedAI
 
 	void Reset()
 	{
-		me->setFaction(83);
+		me->SetFaction(83);
 		summoned = false;
 		summoned2 = false;
 		GocEvent = false;
@@ -1702,7 +1697,7 @@ struct npc_rexxarAI : public ScriptedAI
 				DoScriptText(SAY_REXXAR_3, me);
 				me->HandleEmoteCommand(ANIM_EMOTE_ROAR);
 				me->SetReactState(REACT_AGGRESSIVE);
-				me->setFaction(85);
+				me->SetFaction(85);
 				SayLine2 = true;
 			}
 			else conv_timer -= diff;
@@ -1858,7 +1853,7 @@ struct npc_hufferAI : public ScriptedAI
 
 	void Reset()
 	{
-		me->setFaction(85);
+		me->SetFaction(85);
 		me->GetMotionMaster()->MovePath(600600601, true);
 	}
 };
@@ -2252,7 +2247,7 @@ struct skulloc_soulgrinderAI : public ScriptedAI
 	{
 		me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 		me->SetReactState(REACT_AGGRESSIVE);
-		me->setFaction(35);
+		me->SetFaction(35);
 
 		DoCast(me, 39947);
 
@@ -2546,7 +2541,7 @@ struct skulloc_soulgrinderAI : public ScriptedAI
 
 			if (!Yelled && skulloc_attack_timer <= diff && summoned_spirit20 == true)
 			{
-				me->setFaction(14);
+				me->SetFaction(14);
 				me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 				me->Yell(YELL_SKULLOC_AGGRO, LANG_UNIVERSAL, 0);
 				Yelled = true;
@@ -2772,7 +2767,7 @@ struct npc_felburn_triggerAI : public ScriptedAI
 	{
 		spellHit = false;
 		me->SetCanFly(true);
-		me->canFly();
+		me->CanFly();
 	}
 
 	bool spellHit;

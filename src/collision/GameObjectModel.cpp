@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "VMapFactory.h"
@@ -79,8 +79,7 @@ void LoadGameObjectModelList()
     }
 
     fclose(model_list_file);
-    sLog.outString(">> Loaded %u GameObject models in %u ms", uint32(model_list.size()), getMSTimeDiff(oldMSTime, getMSTime()));
-    sLog.outString();
+    sLog.outString(">> Loaded %u GameObject models.", uint32(model_list.size()));
 }
 
 GameObjectModel::~GameObjectModel()
@@ -132,7 +131,7 @@ bool GameObjectModel::initialize(const GameObject& go, const GameObjectDisplayIn
         Vector3 pos(iBound.corner(i));
         if (Creature* c = const_cast<GameObject&>(go).SummonCreature(23472, pos.x, pos.y, pos.z, 0, TEMPSUMMON_MANUAL_DESPAWN))
         {
-            c->setFaction(35);
+            c->SetFaction(35);
             c->SetFloatValue(OBJECT_FIELD_SCALE_X, 0.1f);
         }
     }

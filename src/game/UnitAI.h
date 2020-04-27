@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef OREGON_UNITAI_H
@@ -22,6 +22,7 @@
 #include <list>
 #include "Unit.h"
 #include "QuestDef.h"
+#include "Utilities/EventMap.h"
 
 class Unit;
 class Player;
@@ -99,6 +100,7 @@ class UnitAI
 
         void DoCast(uint32 spellId);
         void DoCast(Unit* victim, uint32 spellId, bool triggered = false);
+        void DoCastSelf(uint32 spellId, bool triggered = false) { DoCast(me, spellId, triggered); }
         void DoCastVictim(uint32 spellId, bool triggered = false);
         void DoCastAOE(uint32 spellId, bool triggered = false);
 
@@ -110,7 +112,7 @@ class UnitAI
         virtual void sGossipHello(Player* /*player*/) { }
         virtual void sGossipSelect(Player* /*player*/, uint32 /*sender*/, uint32 /*action*/) { }
         virtual void sGossipSelectCode(Player* /*player*/, uint32 /*sender*/, uint32 /*action*/, char const* /*code*/) { }
-        virtual void sQuestAccept(Player* /*player*/, Quest const* /*quest*/) { }
+        virtual void QuestAccept(Player* /*player*/, Quest const* /*quest*/) { }
         virtual void sQuestSelect(Player* /*player*/, Quest const* /*quest*/) { }
         virtual void sQuestReward(Player* /*player*/, Quest const* /*quest*/, uint32 /*opt*/) { }
         virtual bool sOnDummyEffect(Unit* /*caster*/, uint32 /*spellId*/, SpellEffIndex /*effIndex*/) { return false; }

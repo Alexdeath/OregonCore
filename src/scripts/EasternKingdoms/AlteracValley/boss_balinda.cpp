@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -127,7 +127,7 @@ struct boss_balindaAI : public ScriptedAI
     {
         ((mob_water_elementalAI*)summoned->AI())->uiBalindaGUID = me->GetGUID();
         summoned->AI()->AttackStart(SelectTarget(SELECT_TARGET_RANDOM, 0, 50, true));
-        summoned->setFaction(me->getFaction());
+        summoned->SetFaction(me->GetFaction());
         Summons.Summon(summoned);
     }
 

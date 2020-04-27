@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Common.h"
@@ -44,7 +44,7 @@
 #include "SkillExtraItems.h"
 #include "SystemConfig.h"
 #include "Config/Config.h"
-#include "Util.h"
+#include "Utilities/Util.h"
 #include "ItemEnchantmentMgr.h"
 #include "BattlegroundMgr.h"
 #include "InstanceSaveMgr.h"
@@ -516,8 +516,8 @@ bool ChatHandler::HandleReloadAllQuestCommand(const char* /*args*/)
     HandleReloadQuestTemplateCommand("a");
 
     sLog.outString("Re-Loading Quests Relations...");
-    sObjectMgr.LoadQuestRelations();
-    SendGlobalGMSysMessage("DB tables *_questrelation and *_involvedrelation reloaded.");
+    sObjectMgr.LoadQuestStartersAndEnders();
+    SendGlobalGMSysMessage("DB tables *_queststarter and *_questender reloaded.");
     return true;
 }
 
@@ -625,11 +625,11 @@ bool ChatHandler::HandleReloadCommandCommand(const char*)
     return true;
 }
 
-bool ChatHandler::HandleReloadCreatureQuestRelationsCommand(const char*)
+bool ChatHandler::HandleReloadCreatureQuestStarterCommand(const char*)
 {
-    sLog.outString("Loading Quests Relations... (creature_questrelation)");
-    sObjectMgr.LoadCreatureQuestRelations();
-    SendGlobalGMSysMessage("DB table creature_questrelation (creature quest givers) reloaded.");
+    sLog.outString("Loading Quests Relations... (creature_queststarter)");
+    sObjectMgr.LoadCreatureQuestStarters();
+    SendGlobalGMSysMessage("DB table creature_queststarter reloaded.");
     return true;
 }
 
@@ -659,27 +659,27 @@ bool ChatHandler::HandleReloadGossipMenuOptionCommand(const char*)
     return true;
 }
 
-bool ChatHandler::HandleReloadCreatureQuestInvRelationsCommand(const char*)
+bool ChatHandler::HandleReloadCreatureQuestEnderCommand(const char*)
 {
-    sLog.outString("Loading Quests Relations... (creature_involvedrelation)");
-    sObjectMgr.LoadCreatureInvolvedRelations();
-    SendGlobalGMSysMessage("DB table creature_involvedrelation (creature quest takers) reloaded.");
+    sLog.outString("Loading Quests Relations... (creature_questender)");
+    sObjectMgr.LoadCreatureQuestEnders();
+    SendGlobalGMSysMessage("DB table creature_questender reloaded.");
     return true;
 }
 
-bool ChatHandler::HandleReloadGOQuestRelationsCommand(const char*)
+bool ChatHandler::HandleReloadGOQuestStarterCommand(const char*)
 {
-    sLog.outString("Loading Quests Relations... (gameobject_questrelation)");
-    sObjectMgr.LoadGameobjectQuestRelations();
-    SendGlobalGMSysMessage("DB table gameobject_questrelation (gameobject quest givers) reloaded.");
+    sLog.outString("Loading Quests Relations... (gameobject_queststarter)");
+    sObjectMgr.LoadGameobjectQuestStarters();
+    SendGlobalGMSysMessage("DB table gameobject_queststarter reloaded.");
     return true;
 }
 
-bool ChatHandler::HandleReloadGOQuestInvRelationsCommand(const char*)
+bool ChatHandler::HandleReloadGOQuestEnderCommand(const char*)
 {
-    sLog.outString("Loading Quests Relations... (gameobject_involvedrelation)");
-    sObjectMgr.LoadGameobjectInvolvedRelations();
-    SendGlobalGMSysMessage("DB table gameobject_involvedrelation (gameobject quest takers) reloaded.");
+    sLog.outString("Loading Quests Relations... (gameobject_questender)");
+    sObjectMgr.LoadGameobjectQuestEnders();
+    SendGlobalGMSysMessage("DB table gameobject_questender reloaded.");
     return true;
 }
 
@@ -4398,7 +4398,7 @@ bool ChatHandler::HandleNpcInfoCommand(const char* /*args*/)
         return false;
     }
 
-    uint32 faction = target->getFaction();
+    uint32 faction = target->GetFaction();
     uint32 npcflags = target->GetUInt32Value(UNIT_NPC_FLAGS);
     uint32 displayid = target->GetDisplayId();
     uint32 nativeid = target->GetNativeDisplayId();
@@ -4415,7 +4415,7 @@ bool ChatHandler::HandleNpcInfoCommand(const char* /*args*/)
     PSendSysMessage(LANG_NPCINFO_LEVEL, target->getLevel());
     PSendSysMessage(LANG_NPCINFO_HEALTH, target->GetCreateHealth(), target->GetMaxHealth(), target->GetHealth());
     PSendSysMessage(LANG_NPCINFO_INHABIT_TYPE, cInfo->InhabitType);
-    PSendSysMessage(LANG_NPCINFO_FLAGS, target->GetUInt32Value(UNIT_FIELD_FLAGS), target->GetUInt32Value(UNIT_DYNAMIC_FLAGS), target->getFaction());
+    PSendSysMessage(LANG_NPCINFO_FLAGS, target->GetUInt32Value(UNIT_FIELD_FLAGS), target->GetUInt32Value(UNIT_DYNAMIC_FLAGS), target->GetFaction());
     PSendSysMessage(LANG_COMMAND_RAWPAWNTIMES, defRespawnDelayStr.c_str(), curRespawnDelayStr.c_str());
     PSendSysMessage(LANG_NPCINFO_LOOT,  cInfo->lootid, cInfo->pickpocketLootId, cInfo->SkinLootId);
     PSendSysMessage(LANG_NPCINFO_DUNGEON_ID, target->GetInstanceId());
@@ -5754,7 +5754,7 @@ bool ChatHandler::HandleCompleteQuest(const char* args)
     // Add quest items for quests that require items
     for (uint8 x = 0; x < QUEST_OBJECTIVES_COUNT; ++x)
     {
-        uint32 id = pQuest->ReqItemId[x];
+        uint32 id = pQuest->RequiredItemId[x];
         uint32 count = pQuest->ReqItemCount[x];
         if (!id || !count)
             continue;
@@ -6314,7 +6314,7 @@ bool ChatHandler::HandleRespawnCommand(const char* /*args*/)
     cell.SetNoCreate();
 
     Oregon::RespawnDo u_do;
-    Oregon::WorldObjectWorker<Oregon::RespawnDo> worker(u_do);
+    Oregon::WorldObjectWorker<Oregon::RespawnDo> worker(pl, u_do);
 
     TypeContainerVisitor<Oregon::WorldObjectWorker<Oregon::RespawnDo>, GridTypeMapContainer > obj_worker(worker);
     cell.Visit(p, obj_worker, *pl->GetMap(), *pl, pl->GetGridActivationRange());
@@ -7573,7 +7573,7 @@ bool ChatHandler::HandleFreezeCommand(const char* args)
         PSendSysMessage(LANG_COMMAND_FREEZE, name.c_str());
 
         //stop combat + make player unattackable + duel stop + stop some spells
-        player->setFaction(35);
+        player->SetFaction(35);
         player->CombatStop();
         if (player->IsNonMeleeSpellCast(true))
             player->InterruptNonMeleeSpells(true);

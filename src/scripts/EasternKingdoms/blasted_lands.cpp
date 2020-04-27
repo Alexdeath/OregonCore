@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -78,7 +78,7 @@ bool GossipSelect_npc_deathly_usher(Player* pPlayer, Creature* pCreature, uint32
 
 bool GossipHello_npc_fallen_hero_of_horde(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
     if (pPlayer->GetQuestStatus(2784) == QUEST_STATUS_INCOMPLETE)

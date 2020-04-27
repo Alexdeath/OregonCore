@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Totem.h"
@@ -112,9 +112,14 @@ void Totem::InitSummon()
     data << GetGUID();
     SendMessageToSet(&data, true);
 
-    if (m_type == TOTEM_PASSIVE)
-        for (unsigned long i = 0; i < sizeof(m_spells)/sizeof(m_spells[0]); ++i)
-            CastSpell(this, m_spells[i], true);
+    if (m_type == TOTEM_PASSIVE && GetSpell())
+    {
+        CastSpell(this, GetSpell(), true);
+    }
+
+    // Some totems can have both instant effect and passive spell
+    if (GetSpell(1))
+        CastSpell(this, GetSpell(1), true);
 }
 
 void Totem::UnSummon()
@@ -137,18 +142,18 @@ void Totem::UnSummon()
     m_owner->RemoveAurasDueToSpell(GetSpell());
 
     //remove aura all party members too
-    Group* pGroup = NULL;
+    Group* group = NULL;
     if (m_owner->GetTypeId() == TYPEID_PLAYER)
     {
         // Not only the player can summon the totem (scripted AI)
-        pGroup = m_owner->ToPlayer()->GetGroup();
-        if (pGroup)
+        group = m_owner->ToPlayer()->GetGroup();
+        if (group)
         {
-            for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+            for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
             {
-                Player* Target = itr->GetSource();
-                if (Target && pGroup->SameSubGroup(m_owner->ToPlayer(), Target))
-                    Target->RemoveAurasDueToSpell(GetSpell());
+                Player* target = itr->GetSource();
+                if (target && target->IsInMap(m_owner->ToPlayer()) && group->SameSubGroup(m_owner->ToPlayer(), target))
+                    target->RemoveAurasDueToSpell(GetSpell());
             }
         }
     }

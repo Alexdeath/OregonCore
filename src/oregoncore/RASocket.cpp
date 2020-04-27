@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Common.h"
@@ -21,7 +21,7 @@
 #include "AccountMgr.h"
 #include "Log.h"
 #include "RASocket.h"
-#include "Util.h"
+#include "Utilities/Util.h"
 #include "World.h"
 #include "Auth/Sha1.h"
 

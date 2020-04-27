@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef OREGONCORE_TOTEM_H
@@ -37,10 +37,7 @@ class Totem : public Minion
         void InitStats(uint32 duration) override;
         void InitSummon() override;
         void UnSummon();
-        uint32 GetSpell() const
-        {
-            return m_spells[0];
-        }
+        uint32 GetSpell(uint8 slot = 0) const { return m_spells[slot]; }
         uint32 GetTotemDuration() const
         {
             return m_duration;

@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -446,8 +446,7 @@ struct mob_kiljaeden_controllerAI : public Scripted_NoMovementAI
         if (pInstance && pInstance->GetData(DATA_KILJAEDEN_EVENT) == DONE)
             return;
 
-        if (me->canStartAttack(who))
-            AttackStart(who);
+        ScriptedAI::MoveInLineOfSight(who);
 
         DoZoneInCombatWithPlayers(true);
 
@@ -652,7 +651,7 @@ struct boss_kiljaedenAI : public Scripted_NoMovementAI
                 break;
         }
 
-        summoned->setFaction(me->getFaction());
+        summoned->SetFaction(me->GetFaction());
         summons.Summon(summoned);
     }
 
@@ -668,7 +667,7 @@ struct boss_kiljaedenAI : public Scripted_NoMovementAI
 
         if (Creature *controller = pInstance->instance->GetCreature(pInstance->GetData64(DATA_KILJAEDEN_CONTROLLER)))
         {
-            controller->setFaction(35);
+            controller->SetFaction(35);
             controller->RemoveAllAuras();
             controller->DeleteThreatList();
             controller->CombatStop();
@@ -953,7 +952,7 @@ struct mob_hand_of_the_deceiverAI : public ScriptedAI
 
     void JustSummoned(Creature* summoned)
     {
-        summoned->setFaction(me->getFaction());
+        summoned->SetFaction(me->GetFaction());
         summoned->SetLevel(me->getLevel());
     }
 
@@ -1030,7 +1029,7 @@ struct mob_felfire_portalAI : public Scripted_NoMovementAI
 
     void JustSummoned(Creature* summoned)
     {
-        summoned->setFaction(me->getFaction());
+        summoned->SetFaction(me->GetFaction());
         summoned->SetLevel(me->getLevel());
     }
 

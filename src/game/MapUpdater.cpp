@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "MapUpdater.h"
@@ -75,14 +75,6 @@ class MapUpdateRequest : public ACE_Method_Request
             return 0;
         }
 };
-
-MapUpdater::MapUpdater():
-m_executor(), m_mutex(), m_condition(m_mutex), pending_requests(0) { }
-
-MapUpdater::~MapUpdater()
-{
-    deactivate();
-}
 
 int MapUpdater::activate(size_t num_threads)
 {

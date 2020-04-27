@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "UnitAI.h"
@@ -256,7 +256,7 @@ void UnitAI::DoCast(Unit* victim, uint32 spellId, bool triggered)
 void UnitAI::DoCastVictim(uint32 spellId, bool triggered)
 {
     // Why don't we check for casting unit_state and existing target as we do in DoCast(.. ?
-    me->CastSpell(me->GetVictim(), spellId, triggered);
+    DoCast(me->GetVictim(), spellId, triggered);
 }
 
 void UnitAI::DoCastAOE(uint32 spellId, bool triggered)
@@ -354,7 +354,7 @@ void SimpleCharmedAI::UpdateAI(const uint32 /*diff*/)
         me->GetMotionMaster()->MoveFollow(charmer, PET_FOLLOW_DIST, me->GetFollowAngle());
 
     Unit* target = me->GetVictim();
-    if (!target || !charmer->canAttack(target))
+    if (!target || !charmer->IsValidAttackTarget(target))
         AttackStart(charmer->SelectNearestTargetInAttackDistance());
 }
 

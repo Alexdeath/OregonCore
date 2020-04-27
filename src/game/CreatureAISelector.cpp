@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Creature.h"
@@ -54,13 +54,13 @@ CreatureAI* selectAI(Creature* creature)
             ai_factory = ai_registry.GetRegistryItem("PetAI");
         else if (creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK))
             ai_factory = ai_registry.GetRegistryItem("NullCreatureAI");
-        else if (creature->isGuard())
+        else if (creature->IsGuard())
             ai_factory = ai_registry.GetRegistryItem("GuardAI");
         else if (creature->HasUnitTypeMask(UNIT_MASK_CONTROLABLE_GUARDIAN))
             ai_factory = ai_registry.GetRegistryItem("PetAI");
         else if (creature->IsTotem())
             ai_factory = ai_registry.GetRegistryItem("TotemAI");
-        else if (creature->isTrigger())
+        else if (creature->IsTrigger())
         {
             if (creature->m_spells[0])
                 ai_factory = ai_registry.GetRegistryItem("TriggerAI");

@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef __BATTLEGROUNDWS_H
@@ -205,6 +205,7 @@ class BattlegroundWS : public Battleground
         void HandleKillPlayer(Player* player, Player* killer);
         bool SetupBattleground();
         virtual void ResetBGSubclass();
+        void EndBattleground(Team winner);
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
 
         void UpdateFlagState(uint32 team, uint32 value);

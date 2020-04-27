@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -114,7 +114,7 @@ struct boss_gythAI : public ScriptedAI
                 bAggro = true;
                 // Visible now!
                 me->SetDisplayId(9723);
-                me->setFaction(14);
+                me->SetFaction(14);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
             else Aggro_Timer -= diff;

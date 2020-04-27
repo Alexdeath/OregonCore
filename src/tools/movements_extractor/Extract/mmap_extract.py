@@ -14,7 +14,7 @@
  more details.
 
  You should have received a copy of the GNU General Public License along
- with this program. If not, see <http://www.gnu.org/licenses/>.
+ with this program. If not, see <https://www.gnu.org/licenses/>.
 """
  
 import os, sys, threading, time, subprocess
@@ -36,7 +36,7 @@ class workerThread(threading.Thread):
             stInfo.dwFlags |= 0x00000001
             stInfo.wShowWindow = 7
             cFlags = subprocess.CREATE_NEW_CONSOLE
-            binName = "MoveMapGen.exe"
+            binName = "movements_extractor.exe"
         else:
             stInfo = None
             cFlags = 0

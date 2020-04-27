@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Object.h"
@@ -22,7 +22,7 @@
 #include "Creature.h"
 #include "MapManager.h"
 #include "Language.h"
-#include "Util.h"
+#include "Utilities/Util.h"
 
 // these variables aren't used outside of this file, so declare them only here
 uint32 BG_AB_HonorScoreTicks[BG_HONOR_MODE_NUM] =

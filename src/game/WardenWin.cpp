@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Auth/Hmac.h"
@@ -27,7 +27,7 @@
 #include "Database/DatabaseEnv.h"
 #include "World.h"
 #include "Player.h"
-#include "Util.h"
+#include "Utilities/Util.h"
 #include "WardenWin.h"
 #include "WardenModuleWin.h"
 #include "WardenDataStorage.h"
@@ -282,7 +282,7 @@ void WardenWin::RequestData()
             }
         case MODULE_CHECK:
             {
-                uint32 seed = static_cast<uint32>(rand32());
+                uint32 seed = rand32();
                 buff << uint32(seed);
                 HmacHash hmac(4, (uint8*)&seed);
                 hmac.UpdateData(wd->str);

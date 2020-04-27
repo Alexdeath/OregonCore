@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef _OBJECTMGR_H
@@ -386,6 +386,7 @@ typedef UNORDERED_MAP<uint32, NpcTextLocale> NpcTextLocaleMap;
 typedef UNORDERED_MAP<uint32, PageTextLocale> PageTextLocaleMap;
 typedef UNORDERED_MAP<uint32, OregonStringLocale> OregonStringLocaleMap;
 typedef UNORDERED_MAP<uint32, GossipMenuItemsLocale> GossipMenuItemsLocaleMap;
+typedef UNORDERED_MAP<uint32, PointOfInterestLocale> PointOfInterestLocaleMap;
 
 typedef std::multimap<uint32, uint32> QuestRelations;
 
@@ -419,21 +420,32 @@ struct RepSpilloverTemplate
     uint32 faction_rank[MAX_SPILLOVER_FACTIONS];
 };
 
+struct PointOfInterest
+{
+    uint32 entry;
+    float x;
+    float y;
+    uint32 icon;
+    uint32 flags;
+    uint32 data;
+    std::string icon_name;
+};
+
 struct GossipMenuItems
 {
-    uint32          menu_id;
-    uint32          id;
-    uint8           option_icon;
-    std::string     option_text;
-    uint32          option_id;
-    uint32          npc_option_npcflag;
-    uint32          action_menu_id;
-    uint32          action_poi_id;
-    uint32          action_script_id;
-    bool            box_coded;
-    uint32          box_money;
-    std::string     box_text;
-    ConditionList   conditions;
+    uint32          MenuId;
+    uint32          OptionIndex;
+    uint8           OptionIcon;
+    std::string     OptionText;
+    uint32          OptionType;
+    uint32          OptionNpcflag;
+    uint32          ActionMenuId;
+    uint32          ActionPoiId;
+    uint32          ActionScriptId;
+    bool            BoxCoded;
+    uint32          BoxMoney;
+    std::string     BoxText;
+    ConditionList   Conditions;
 };
 
 struct GossipMenus
@@ -539,6 +551,8 @@ class ObjectMgr
         typedef UNORDERED_MAP<uint32, ReputationOnKillEntry> RepOnKillMap;
         typedef UNORDERED_MAP<uint32, RepSpilloverTemplate> RepSpilloverTemplateMap;
 
+        typedef UNORDERED_MAP<uint32, PointOfInterest> PointOfInterestMap;
+
         typedef UNORDERED_MAP<uint32, WeatherZoneChances> WeatherZoneMap;
 
         typedef UNORDERED_MAP<uint32, PetCreateSpellEntry> PetCreateSpellMap;
@@ -618,6 +632,7 @@ class ObjectMgr
         CreatureModelInfo const* GetCreatureModelInfo(uint32 modelid);
         CreatureModelInfo const* GetCreatureModelRandomGender(uint32 display_id);
         uint32 ChooseDisplayId(uint32 team, const CreatureInfo* cinfo, const CreatureData* data = NULL);
+        static void ChooseCreatureFlags(const CreatureInfo *cinfo, uint32& npcflag, uint32& unit_flags, uint32& dynamicflags, const CreatureData *data = NULL);
         EquipmentInfo const* GetEquipmentInfo(uint32 entry);
         EquipmentInfoRaw const* GetEquipmentInfoRaw( uint32 entry );
         static CreatureDataAddon const* GetCreatureAddon(uint32 lowguid)
@@ -759,17 +774,29 @@ class ObjectMgr
             return NULL;
         }
 
+        PointOfInterest const* GetPointOfInterest(uint32 id) const
+        {
+            PointOfInterestMap::const_iterator itr = mPointsOfInterest.find(id);
+            if (itr != mPointsOfInterest.end())
+                return &itr->second;
+            return NULL;
+        }
+
         void LoadGuilds();
         void LoadArenaTeams();
         void LoadGroups();
         void LoadQuests();
-        void LoadQuestRelations()
+        void LoadQuestStartersAndEnders()
         {
-            LoadGameobjectQuestRelations();
-            LoadGameobjectInvolvedRelations();
-            LoadCreatureQuestRelations();
-            LoadCreatureInvolvedRelations();
+            LoadGameobjectQuestStarters();
+            LoadGameobjectQuestEnders();
+            LoadCreatureQuestStarters();
+            LoadCreatureQuestEnders();
         }
+        void LoadGameobjectQuestStarters();
+        void LoadGameobjectQuestEnders();
+        void LoadCreatureQuestStarters();
+        void LoadCreatureQuestEnders();
 
         QuestRelations* GetGOQuestRelationMap()
         {
@@ -782,11 +809,6 @@ class ObjectMgr
         }
 
         CreatureBaseStats const* GetCreatureClassLvlStats(uint32 level, uint32 unitClass, int32 expansion) const;
-
-        void LoadGameobjectQuestRelations();
-        void LoadGameobjectInvolvedRelations();
-        void LoadCreatureQuestRelations();
-        void LoadCreatureInvolvedRelations();
 
         QuestRelations mGOQuestRelations;
         QuestRelations mGOQuestInvolvedRelations;
@@ -832,6 +854,7 @@ class ObjectMgr
         void LoadNpcTextLocales();
         void LoadPageTextLocales();
         void LoadGossipMenuItemsLocales();
+        void LoadPointOfInterestLocales();
         void LoadInstanceTemplate();
 
         void LoadGossipText();
@@ -857,6 +880,7 @@ class ObjectMgr
 
         void LoadReputationOnKill();
         void LoadReputationSpilloverTemplate();
+        void LoadPointsOfInterest();
 
         void LoadWeatherZoneChances();
         void LoadGameTele();
@@ -992,6 +1016,12 @@ class ObjectMgr
         {
             GossipMenuItemsLocaleMap::const_iterator itr = mGossipMenuItemsLocaleMap.find(entry);
             if (itr == mGossipMenuItemsLocaleMap.end()) return NULL;
+            return &itr->second;
+        }
+        PointOfInterestLocale const* GetPointOfInterestLocale(uint32 poi_id) const
+        {
+            PointOfInterestLocaleMap::const_iterator itr = mPointOfInterestLocaleMap.find(poi_id);
+            if (itr == mPointOfInterestLocaleMap.end()) return NULL;
             return &itr->second;
         }
 
@@ -1204,6 +1234,7 @@ class ObjectMgr
 
         GossipMenusMap      m_mGossipMenusMap;
         GossipMenuItemsMap  m_mGossipMenuItemsMap;
+        PointOfInterestMap  mPointsOfInterest;
 
         WeatherZoneMap      mWeatherZoneMap;
 
@@ -1268,6 +1299,7 @@ class ObjectMgr
         PageTextLocaleMap mPageTextLocaleMap;
         OregonStringLocaleMap mOregonStringLocaleMap;
         GossipMenuItemsLocaleMap mGossipMenuItemsLocaleMap;
+        PointOfInterestLocaleMap mPointOfInterestLocaleMap;
         RespawnTimes mCreatureRespawnTimes;
         RespawnTimes mGORespawnTimes;
 

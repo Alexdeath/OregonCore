@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef __SPELL_H
@@ -667,6 +667,8 @@ class Spell
 
         void GetSummonPosition(uint32 i, Position& pos, float radius = 0.0f);
         void SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* properties);
+
+        SpellCastResult CanOpenLock(uint32 effIndex, uint32 lockid, SkillType& skillid, int32& reqSkillValue, int32& skillValue);
         // -------------------------------------------
 
         //List For Triggered Spells
@@ -705,11 +707,12 @@ struct SpellNotifierCreatureAndPlayer
     Unit* i_caster;
     uint32 i_entry;
     const Position* const i_pos;
+    SpellEntry const* i_spellProto;
 
     SpellNotifierCreatureAndPlayer(Spell& spell, std::list<Unit*>& data, float radius, const uint32& type,
-                                   SpellTargets TargetType = SPELL_TARGETS_ENEMY, const Position* pos = NULL, uint32 entry = 0)
+                                   SpellTargets TargetType = SPELL_TARGETS_ENEMY, const Position* pos = NULL, uint32 entry = 0, SpellEntry const* spellProto = NULL)
         : i_data(&data), i_spell(spell), i_push_type(type), i_radius(radius), i_radiusSq(radius* radius),
-          i_TargetType(TargetType), i_caster(spell.GetCaster()), i_entry(entry), i_pos(pos)
+          i_TargetType(TargetType), i_caster(spell.GetCaster()), i_entry(entry), i_pos(pos), i_spellProto(spellProto)
     {
     }
 
@@ -722,13 +725,13 @@ struct SpellNotifierCreatureAndPlayer
 
         for (typename GridRefManager<T>::iterator itr = m.begin(); itr != m.end(); ++itr)
         {
-            if (!itr->GetSource()->IsAlive() || (itr->GetSource()->GetTypeId() == TYPEID_PLAYER && ((Player*)itr->GetSource())->isInFlight()))
+            if (!itr->GetSource()->IsAlive() || (itr->GetSource()->GetTypeId() == TYPEID_PLAYER && ((Player*)itr->GetSource())->IsInFlight()))
                 continue;
 
             switch (i_TargetType)
             {
             case SPELL_TARGETS_ALLY:
-                if (!i_caster->IsFriendlyTo(itr->GetSource()))
+                if (!i_caster->_IsValidAssistTarget(itr->GetSource(), i_spellProto))
                     continue;
                 if (itr->GetSource()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
                     continue;
@@ -751,24 +754,7 @@ struct SpellNotifierCreatureAndPlayer
                             continue;
                     }
 
-                    Unit* check = i_caster->GetCharmerOrOwnerOrSelf();
-
-                    if (check->IsControlledByPlayer())
-                    {
-                        if (check->IsFriendlyTo(itr->GetSource()))
-                            continue;
-                    }
-                    else
-                    {
-                        if (!check->IsHostileTo(itr->GetSource()))
-                            continue;
-                    }
-
-                    if ( check->GetTypeId() == TYPEID_PLAYER &&             // Victim is Player
-                         itr->GetSource()->GetTypeId() == TYPEID_PLAYER &&   // Source is Player
-                         !((Player*)check)->duel &&                          // Not in duel
-                         !((Player*)check)->InArena() &&                     // Not in arena
-                         !((Player*)check)->IsPvP())                         // PVP Deactivated (Not in BG by default)
+                    if (!i_caster->_IsValidAttackTarget(itr->GetSource(), i_spellProto))
                         continue;
 
                 }

@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "ScriptMgr.h"
@@ -454,7 +454,7 @@ struct mob_giant_infernalAI : public hyjal_trashAI
             if (trigger)
             {
                 trigger->SetVisible(false);
-                trigger->setFaction(me->getFaction());
+                trigger->SetFaction(me->GetFaction());
                 trigger->SetLevitate(true);
                 trigger->CastSpell(me, SPELL_METEOR, true);
             }

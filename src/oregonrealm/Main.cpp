@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /**
@@ -31,7 +31,7 @@
 #include "Log.h"
 #include "AuthSocket.h"
 #include "SystemConfig.h"
-#include "Util.h"
+#include "Utilities/Util.h"
 
 #include <ace/Get_Opt.h>
 #include <ace/Dev_Poll_Reactor.h>

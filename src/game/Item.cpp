@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Common.h"
@@ -972,6 +972,19 @@ Item* Item::CloneItem(uint32 count, Player const* player) const
     newItem->SetUInt32Value(ITEM_FIELD_DURATION,     GetUInt32Value(ITEM_FIELD_DURATION));
     newItem->SetItemRandomProperties(GetItemRandomPropertyId());
     return newItem;
+}
+
+bool Item::IsBindedNotWith(Player const* player) const
+{
+    // not binded item
+    if (!IsSoulBound())
+        return false;
+
+    // own item
+    if (GetOwnerGUID() == player->GetGUID())
+        return false;
+
+   return true;
 }
 
 void Item::BuildUpdate(UpdateDataMapType& data_map)

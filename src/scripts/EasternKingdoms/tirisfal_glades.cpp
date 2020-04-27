@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -47,7 +47,7 @@ struct npc_calvin_montagueAI : public ScriptedAI
 {
     npc_calvin_montagueAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_uiNormFaction = pCreature->getFaction();
+        m_uiNormFaction = pCreature->GetFaction();
         Reset();
     }
 
@@ -62,8 +62,8 @@ struct npc_calvin_montagueAI : public ScriptedAI
         m_uiPhaseTimer = 5000;
         m_uiPlayerGUID = 0;
 
-        if (me->getFaction() != m_uiNormFaction)
-            me->setFaction(m_uiNormFaction);
+        if (me->GetFaction() != m_uiNormFaction)
+            me->SetFaction(m_uiNormFaction);
     }
 
     void AttackedBy(Unit* pAttacker)
@@ -80,7 +80,7 @@ struct npc_calvin_montagueAI : public ScriptedAI
         {
             uiDamage = 0;
 
-            me->setFaction(m_uiNormFaction);
+            me->SetFaction(m_uiNormFaction);
             me->CombatStop(true);
 
             m_uiPhase = 1;
@@ -139,7 +139,7 @@ bool QuestAccept_npc_calvin_montague(Player* pPlayer, Creature* pCreature, const
 {
     if (pQuest->GetQuestId() == QUEST_590)
     {
-        pCreature->setFaction(FACTION_HOSTILE);
+        pCreature->SetFaction(FACTION_HOSTILE);
         pCreature->AI()->AttackStart(pPlayer);
     }
     return true;
@@ -195,7 +195,7 @@ void AddSC_tirisfal_glades()
     newscript = new Script;
     newscript->Name = "npc_calvin_montague";
     newscript->GetAI = &GetAI_npc_calvin_montague;
-    newscript->pQuestAccept = &QuestAccept_npc_calvin_montague;
+    newscript->QuestAccept = &QuestAccept_npc_calvin_montague;
     newscript->RegisterSelf();
 
     newscript = new Script;

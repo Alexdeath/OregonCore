@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -66,7 +66,7 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI
                 me->RemoveAurasDueToSpell(SPELL_AURA_MOD_STEALTH);
 
             SetRun();
-            me->setFaction(FACTION_ENEMY);
+            me->SetFaction(FACTION_ENEMY);
             break;
         }
     }
@@ -165,6 +165,6 @@ void AddSC_wetlands()
 
     newscript = new Script;
     newscript->Name = "npc_mikhail";
-    newscript->pQuestAccept = &QuestAccept_npc_mikhail;
+    newscript->QuestAccept = &QuestAccept_npc_mikhail;
     newscript->RegisterSelf();
 }

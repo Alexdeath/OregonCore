@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -94,7 +94,7 @@ struct boss_ouroAI : public ScriptedAI
             //Cast
             me->HandleEmoteCommand(EMOTE_ONESHOT_SUBMERGE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            me->setFaction(35);
+            me->SetFaction(35);
             DoCast(me, SPELL_DIRTMOUND_PASSIVE);
 
             Submerged = true;
@@ -119,7 +119,7 @@ struct boss_ouroAI : public ScriptedAI
         if (Submerged && Back_Timer <= diff)
         {
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            me->setFaction(14);
+            me->SetFaction(14);
 
             DoCastVictim( SPELL_GROUND_RUPTURE);
 

@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Common.h"
@@ -23,7 +23,7 @@
 #include "ByteBuffer.h"
 #include <openssl/sha.h>
 #include "World.h"
-#include "Util.h"
+#include "Utilities/Util.h"
 #include "WardenBase.h"
 #include "WardenWin.h"
 

@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * @file ZoneScript.h
  */
@@ -43,8 +43,8 @@ class ZoneScript
 
         virtual void OnCreatureCreate(Creature*, bool /*add*/) {}
         virtual void OnGameObjectCreate(GameObject* /*go*/, bool /*add*/) {}
-
         virtual void OnCreatureDeath(Creature* /*creature*/) {}
+        virtual void OnPlayerDeath(Player *) {}
 
         /// All-purpose data storage 64 bit
         virtual uint64 GetData64(uint32 /*DataId*/)

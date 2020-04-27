@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Common.h"
@@ -38,7 +38,7 @@
 #include "CreatureAISelector.h"
 #include "InstanceData.h"
 #include "Battleground.h"
-#include "Util.h"
+#include "Utilities/Util.h"
 #include "OutdoorPvPMgr.h"
 #include "BattlegroundAV.h"
 #include "GameObjectModel.h"
@@ -163,12 +163,13 @@ void GameObject::RemoveFromWorld()
     }
 }
 
-bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, GOState go_state, uint32 artKit)
+bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, GOState go_state, uint32 artKit)
 {
     ASSERT(map);
     SetMap(map);
 
     Relocate(x, y, z, ang);
+
     if (!IsPositionValid())
     {
         sLog.outError("Gameobject (GUID: %u Entry: %u) not created. Suggested coordinates isn't valid (X: %f Y: %f)", guidlow, name_id, x, y);
@@ -192,6 +193,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, float x, float
         return false;
     }
 
+    SetPhaseMask(phaseMask, false);
     SetFloatValue(GAMEOBJECT_POS_X, x);
     SetFloatValue(GAMEOBJECT_POS_Y, y);
     SetFloatValue(GAMEOBJECT_POS_Z, z);
@@ -221,6 +223,10 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, float x, float
     SetZoneScript();
 
     AIM_Initialize();
+
+    // Check if GameObject is Large
+    if (goinfo->IsLargeGameObject())
+        SetVisibilityDistanceOverride(VISDIST_LARGE);
 
     return true;
 }
@@ -303,7 +309,7 @@ void GameObject::Update(uint32 diff)
                             {
                                 caster->FinishSpell(CURRENT_CHANNELED_SPELL);
 
-                                WorldPacket data(SMSG_FISH_NOT_HOOKED, 0);
+                                WorldPacket data(SMSG_FISH_ESCAPED, 0);
                                 caster->ToPlayer()->GetSession()->SendPacket(&data);
                             }
                             // can be delete
@@ -380,7 +386,7 @@ void GameObject::Update(uint32 diff)
                     {
                         // Hunter trap: Search units which are unfriendly to the trap's owner
                         Oregon::AnyUnfriendlyNoTotemUnitInObjectRangeCheck checker(this, owner, radius);
-                        Oregon::UnitSearcher<Oregon::AnyUnfriendlyNoTotemUnitInObjectRangeCheck> searcher(ok, checker);
+                        Oregon::UnitSearcher<Oregon::AnyUnfriendlyNoTotemUnitInObjectRangeCheck> searcher(this, ok, checker);
                         VisitNearbyGridObject(radius, searcher);
                         if (!ok)
                             VisitNearbyWorldObject(radius, searcher);
@@ -390,7 +396,7 @@ void GameObject::Update(uint32 diff)
                         // Environmental trap: Any player
                         Player* player = NULL;
                         Oregon::AnyPlayerInObjectRangeCheck checker(this, radius);
-                        Oregon::PlayerSearcher<Oregon::AnyPlayerInObjectRangeCheck> searcher(player, checker);
+                        Oregon::PlayerSearcher<Oregon::AnyPlayerInObjectRangeCheck> searcher(this, player, checker);
                         VisitNearbyWorldObject(radius, searcher);
                         ok = player;
                     }
@@ -496,12 +502,21 @@ void GameObject::Update(uint32 diff)
             //! The GetOwnerGUID() check is mostly for compatibility with hacky scripts - 99% of the time summoning should be done trough spells.
             if (GetSpellId() || GetOwnerGUID())
             {
-                SetRespawnTime(0);
-                Delete();
+                //Don't delete spell spawned chests, which are not consumed on loot
+                if (m_respawnTime > 0 && GetGoType() == GAMEOBJECT_TYPE_CHEST && !GetGOInfo()->IsDespawnAtAction())
+                {
+                    UpdateObjectVisibility();
+                    SetLootState(GO_READY);
+                }
+                else
+                {
+                    SetRespawnTime(0);
+                    Delete();
+                }
                 return;
             }
 
-            SetLootState(GO_READY);
+            SetLootState(GO_NOT_READY);
 
             //burning flags in some battlegrounds, if you find better condition, just add it
             if (GetGOInfo()->IsDespawnAtAction() || GetGoAnimProgress() > 0)
@@ -524,7 +539,7 @@ void GameObject::Update(uint32 diff)
             if (!m_spawnedByDefault)
             {
                 m_respawnTime = 0;
-                UpdateObjectVisibility();
+                Delete();
                 return;
             }
 
@@ -600,10 +615,10 @@ void GameObject::SaveToDB()
         return;
     }
 
-    SaveToDB(GetMapId(), data->spawnMask);
+    SaveToDB(GetMapId(), data->spawnMask, data->phaseMask);
 }
 
-void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask)
+void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
 {
     const GameObjectInfo* goI = GetGOInfo();
 
@@ -618,6 +633,10 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask)
     // data->guid = guid don't must be update at save
     data.id = GetEntry();
     data.mapid = mapid;
+    data.zoneId = GetZoneId();
+    data.areaId = GetAreaId();
+    data.spawnMask = spawnMask;
+    data.phaseMask = phaseMask;
     data.posX = GetFloatValue(GAMEOBJECT_POS_X);
     data.posY = GetFloatValue(GAMEOBJECT_POS_Y);
     data.posZ = GetFloatValue(GAMEOBJECT_POS_Z);
@@ -629,16 +648,17 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask)
     data.spawntimesecs = m_spawnedByDefault ? m_respawnDelayTime : -(int32)m_respawnDelayTime;
     data.animprogress = GetGoAnimProgress();
     data.go_state = GetGoState();
-    data.spawnMask = spawnMask;
-    data.artKit = GetUInt32Value (GAMEOBJECT_ARTKIT);
 
     // updated in DB
     std::ostringstream ss;
     ss << "INSERT INTO gameobject VALUES ("
        << m_DBTableGuid << ", "
-       << GetUInt32Value (OBJECT_FIELD_ENTRY) << ", "
+       << GetUInt32Value(OBJECT_FIELD_ENTRY) << ", "
        << mapid << ", "
+       << (uint32)GetZoneId() << ", "
+       << (uint32)GetAreaId() << ", "
        << (uint32)spawnMask << ", "
+       << (uint32)phaseMask << ", "
        << GetFloatValue(GAMEOBJECT_POS_X) << ", "
        << GetFloatValue(GAMEOBJECT_POS_Y) << ", "
        << GetFloatValue(GAMEOBJECT_POS_Z) << ", "
@@ -669,6 +689,7 @@ bool GameObject::LoadGameObjectFromDB(uint32 guid, Map* map, bool addToMap)
 
     uint32 entry = data->id;
     //uint32 map_id = data->mapid;
+    uint32 phaseMask = data->phaseMask;
     float x = data->posX;
     float y = data->posY;
     float z = data->posZ;
@@ -686,7 +707,7 @@ bool GameObject::LoadGameObjectFromDB(uint32 guid, Map* map, bool addToMap)
     m_DBTableGuid = guid;
     if (map->GetInstanceId() != 0) guid = sObjectMgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
 
-    if (!Create(guid, entry, map, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress, go_state, artKit))
+    if (!Create(guid, entry, map, phaseMask, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress, go_state, artKit))
         return false;
 
     if (data->spawntimesecs >= 0)
@@ -804,7 +825,7 @@ bool GameObject::IsAlwaysVisibleFor(WorldObject const* seer) const
 
     if (IsTransport())
         return true;
-    
+
     if (!seer)
         return false;
 
@@ -910,7 +931,7 @@ void GameObject::TriggeringLinkedGameObject(uint32 trapEntry, Unit* target)
         Cell cell(p);
 
         Oregon::NearestGameObjectEntryInObjectRangeCheck go_check(*target, trapEntry, range);
-        Oregon::GameObjectLastSearcher<Oregon::NearestGameObjectEntryInObjectRangeCheck> checker(trapGO, go_check);
+        Oregon::GameObjectLastSearcher<Oregon::NearestGameObjectEntryInObjectRangeCheck> checker(target, trapGO, go_check);
 
         TypeContainerVisitor<Oregon::GameObjectLastSearcher<Oregon::NearestGameObjectEntryInObjectRangeCheck>, GridTypeMapContainer > object_checker(checker);
         cell.Visit(p, object_checker, *GetMap(), *target, range);
@@ -929,7 +950,7 @@ GameObject* GameObject::LookupFishingHoleAround(float range)
     CellCoord p(Oregon::ComputeCellCoord(GetPositionX(), GetPositionY()));
     Cell cell(p);
     Oregon::NearestGameObjectFishingHole u_check(*this, range);
-    Oregon::GameObjectSearcher<Oregon::NearestGameObjectFishingHole> checker(ok, u_check);
+    Oregon::GameObjectSearcher<Oregon::NearestGameObjectFishingHole> checker(this, ok, u_check);
 
     TypeContainerVisitor<Oregon::GameObjectSearcher<Oregon::NearestGameObjectFishingHole>, GridTypeMapContainer > grid_object_checker(checker);
     cell.Visit(p, grid_object_checker, *GetMap(), *this, range);
@@ -1340,6 +1361,7 @@ void GameObject::Use(Unit* user)
             }
 
             user->RemoveAurasByType(SPELL_AURA_MOUNTED);
+            user->RemoveAurasByType(SPELL_AURA_FLY);
             spellId = info->spellcaster.spellId;
 
             break;
@@ -1491,7 +1513,7 @@ void GameObject::SetLootState(LootState s, Unit* unit)
          // Use the current go state
          if ((GetGoState() != GO_STATE_READY && (s == GO_ACTIVATED || s == GO_JUST_DEACTIVATED)) || s == GO_READY)
             collision = !collision;
-         
+
         EnableCollision(collision);
     }
 }
@@ -1520,22 +1542,25 @@ void GameObject::CastSpell(Unit* target, uint32 spellId, bool triggered /*= true
     }
 
     //summon world trigger
-    Creature* trigger = SummonTrigger(GetPositionX(), GetPositionY(), GetPositionZ(), 0, 1);
+    Creature* trigger = SummonTrigger(GetPositionX(), GetPositionY(), GetPositionZ(), 0, GetSpellCastTime(spellProto) + 100);
     if (!trigger)
         return;
 
+    // remove immunity flags, to allow spell to target anything
+    trigger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+
     if (Unit* owner = GetOwner())
     {
-        trigger->setFaction(owner->getFaction());
+        trigger->SetFaction(owner->GetFaction());
         if (owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
             trigger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
         trigger->CastSpell(target ? target : trigger, spellId, triggered, 0, 0, owner->GetGUID());
     }
     else
     {
-        trigger->setFaction(14);
+        trigger->SetFaction(IsPositiveSpell(spellId) ? 35 : 14);
         // Set owner guid for target if no owner available - needed by trigger auras
-        trigger->CastSpell(target ? target : trigger, spellId, triggered, 0, 0, target ? target->GetGUID() : 0);
+        trigger->CastSpell(target ? target : trigger, spellProto, triggered, nullptr, nullptr, target ? target->GetGUID() : 0);
     }
 }
 
@@ -1591,9 +1616,26 @@ void GameObject::SetGoState(GOState state)
         // startOpen determines whether we are going to add or remove the LoS on activation
         bool collision = false;
         if (state == GO_STATE_READY)
-            collision = !collision; 
- 
+            collision = !collision;
+
         EnableCollision(collision);
+    }
+}
+
+float GameObject::GetInteractionDistance() const
+{
+    switch (GetGoType())
+    {
+        /// @todo find out how the client calculates the maximal usage distance to spellless working
+        // gameobjects like guildbanks and mailboxes - 10.0 is a just an abitrary choosen number
+    case GAMEOBJECT_TYPE_GUILD_BANK:
+    case GAMEOBJECT_TYPE_MAILBOX:
+        return 10.0f;
+    case GAMEOBJECT_TYPE_FISHINGHOLE:
+    case GAMEOBJECT_TYPE_FISHINGNODE:
+        return 20.0f + CONTACT_DISTANCE; // max spell range
+    default:
+        return INTERACTION_DISTANCE;
     }
 }
 
@@ -1614,6 +1656,11 @@ void GameObject::SetDisplayId(uint32 displayid)
 {
     SetUInt32Value(GAMEOBJECT_DISPLAYID, displayid);
     UpdateModel();
+}
+
+void GameObject::SetPhaseMask(uint32 newPhaseMask, bool update)
+{
+    WorldObject::SetPhaseMask(newPhaseMask, update);
 }
 
 void GameObject::EnableCollision(bool enable)

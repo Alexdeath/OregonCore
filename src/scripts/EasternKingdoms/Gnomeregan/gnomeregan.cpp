@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* Script Data Start
@@ -235,8 +235,8 @@ struct npc_blastmaster_emi_shortfuseAI : public npc_escortAI
     {
         //just in case
         if (GetPlayerForEscort())
-            if (me->getFaction() != GetPlayerForEscort()->getFaction())
-                me->setFaction(GetPlayerForEscort()->getFaction());
+            if (me->GetFaction() != GetPlayerForEscort()->GetFaction())
+                me->SetFaction(GetPlayerForEscort()->GetFaction());
 
         switch (uiPoint)
         {
@@ -531,7 +531,7 @@ bool GossipSelect_npc_blastmaster_emi_shortfuse(Player* pPlayer, Creature* pCrea
         if (npc_escortAI* pEscortAI = CAST_AI(npc_blastmaster_emi_shortfuseAI, pCreature->AI()))
             pEscortAI->Start(true, false, pPlayer->GetGUID());
 
-        pCreature->setFaction(pPlayer->getFaction());
+        pCreature->SetFaction(pPlayer->GetFaction());
         pCreature->AI()->SetData(1, 0);
 
         pPlayer->CLOSE_GOSSIP_MENU();
@@ -707,6 +707,6 @@ void AddSC_gnomeregan()
 	newscript = new Script;
 	newscript->Name = "npc_kernobee";
 	newscript->GetAI = &GetAI_npc_kernobee;
-	newscript->pQuestAccept = &QuestAccept_npc_kernobee;
+	newscript->QuestAccept = &QuestAccept_npc_kernobee;
 	newscript->RegisterSelf();
 }

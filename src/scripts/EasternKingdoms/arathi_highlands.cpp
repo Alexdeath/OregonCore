@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -122,7 +122,7 @@ bool QuestAccept_npc_professor_phizzlethorpe(Player* pPlayer, Creature* pCreatur
         if (npc_escortAI* pEscortAI = CAST_AI(npc_professor_phizzlethorpeAI, (pCreature->AI())))
             pEscortAI->Start(false, false, pPlayer->GetGUID(), pQuest);
 
-        pCreature->setFaction(113);
+        pCreature->SetFaction(113);
     }
     return true;
 }
@@ -139,6 +139,6 @@ void AddSC_arathi_highlands()
     newscript = new Script;
     newscript->Name = "npc_professor_phizzlethorpe";
     newscript->GetAI = &GetAI_npc_professor_phizzlethorpeAI;
-    newscript->pQuestAccept = &QuestAccept_npc_professor_phizzlethorpe;
+    newscript->QuestAccept = &QuestAccept_npc_professor_phizzlethorpe;
     newscript->RegisterSelf();
 }

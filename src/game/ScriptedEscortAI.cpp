@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -109,7 +109,7 @@ void npc_escortAI::MoveInLineOfSight(Unit* pWho)
         if (HasEscortState(STATE_ESCORT_ESCORTING) && AssistPlayerInCombat(pWho))
             return;
 
-        if (!me->canFly() && me->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
+        if (!me->CanFly() && me->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
             return;
 
         if (me->IsHostileTo(pWho))
@@ -143,23 +143,24 @@ void npc_escortAI::JustDied(Unit* /*pKiller*/)
     if (!HasEscortState(STATE_ESCORT_ESCORTING) || !m_uiPlayerGUID || !m_pQuestForEscort)
         return;
 
-    if (Player* pPlayer = GetPlayerForEscort())
+    if (Player* player = GetPlayerForEscort())
     {
-        if (Group* pGroup = pPlayer->GetGroup())
+        if (Group* pGroup = player->GetGroup())
         {
             for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != NULL; pRef = pRef->next())
             {
-                if (Player* pMember = pRef->GetSource())
+                if (Player* member = pRef->GetSource())
                 {
-                    if (pMember->GetQuestStatus(m_pQuestForEscort->GetQuestId()) == QUEST_STATUS_INCOMPLETE)
-                        pMember->FailQuest(m_pQuestForEscort->GetQuestId());
+                    if (member->GetQuestStatus(m_pQuestForEscort->GetQuestId()) == QUEST_STATUS_INCOMPLETE)
+                        if (member->IsInMap(player))
+                            member->FailQuest(m_pQuestForEscort->GetQuestId());
                 }
             }
         }
         else
         {
-            if (pPlayer->GetQuestStatus(m_pQuestForEscort->GetQuestId()) == QUEST_STATUS_INCOMPLETE)
-                pPlayer->FailQuest(m_pQuestForEscort->GetQuestId());
+            if (player->GetQuestStatus(m_pQuestForEscort->GetQuestId()) == QUEST_STATUS_INCOMPLETE)
+                player->FailQuest(m_pQuestForEscort->GetQuestId());
         }
     }
 }
@@ -174,7 +175,7 @@ void npc_escortAI::JustRespawned()
     //add a small delay before going to first waypoint, normal in near all cases
     m_uiWPWaitTimer = 2500;
 
-    if (me->getFaction() != me->GetCreatureTemplate()->faction)
+    if (me->GetFaction() != me->GetCreatureTemplate()->faction)
         me->RestoreFaction();
 
     Reset();

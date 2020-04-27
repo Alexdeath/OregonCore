@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Common.h"
@@ -331,7 +331,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recv_data)
     }
 
     // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
-    if (opcode == MSG_MOVE_FALL_LAND && plMover && !plMover->isInFlight())
+    if (opcode == MSG_MOVE_FALL_LAND && plMover && !plMover->IsInFlight())
         plMover->HandleFallDamage(movementInfo);
 
     if (plMover && (movementInfo.HasMovementFlag(MOVEMENTFLAG_SWIMMING) != plMover->IsInWater()))
@@ -469,7 +469,7 @@ void WorldSession::HandleMoveNotActiveMoverOpcode(WorldPacket& recv_data)
     uint64 old_mover_guid;
     MovementInfo mi;
 
-    old_mover_guid = recv_data.readPackGUID();
+    recv_data >> old_mover_guid;
     recv_data >> mi;
 
     if (!old_mover_guid)

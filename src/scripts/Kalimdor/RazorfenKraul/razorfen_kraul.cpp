@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -127,7 +127,7 @@ bool QuestAccept_npc_willix(Player* pPlayer, Creature* pCreature, Quest const* q
     {
         CAST_AI(npc_escortAI, (pCreature->AI()))->Start(true, false, pPlayer->GetGUID());
         DoScriptText(SAY_READY, pCreature, pPlayer);
-        pCreature->setFaction(113);
+        pCreature->SetFaction(113);
     }
 
     return true;
@@ -185,7 +185,7 @@ void AddSC_razorfen_kraul()
     newscript = new Script;
     newscript->Name = "npc_willix";
     newscript->GetAI = &GetAI_npc_willix;
-    newscript->pQuestAccept = &QuestAccept_npc_willix;
+    newscript->QuestAccept = &QuestAccept_npc_willix;
     newscript->RegisterSelf();
 
     newscript = new Script;

@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -43,7 +43,7 @@ EndContentData */
 #define GOSSIP_SNF "[PH] ..."
 bool GossipHello_npc_neeru_fireblade(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
     if (pPlayer->GetQuestStatus(QUEST_5727) == QUEST_STATUS_INCOMPLETE)
@@ -222,7 +222,7 @@ CreatureAI* GetAI_npc_thrall_warchief(Creature* pCreature)
 
 bool GossipHello_npc_thrall_warchief(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
     if (pPlayer->GetQuestStatus(QUEST_6566) == QUEST_STATUS_INCOMPLETE)
@@ -283,7 +283,7 @@ bool GossipSelect_npc_thrall_warchief(Player* pPlayer, Creature* pCreature, uint
 
 bool GossipHello_npc_eitrigg(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
     if (pPlayer->GetQuestStatus(4941) == QUEST_STATUS_INCOMPLETE)
@@ -346,7 +346,7 @@ void AddSC_orgrimmar()
     newscript = new Script;
     newscript->Name = "npc_shenthul";
     newscript->GetAI = &GetAI_npc_shenthul;
-    newscript->pQuestAccept =  &QuestAccept_npc_shenthul;
+    newscript->QuestAccept =  &QuestAccept_npc_shenthul;
     newscript->RegisterSelf();
 
     newscript = new Script;

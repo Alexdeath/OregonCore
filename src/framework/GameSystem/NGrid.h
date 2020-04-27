@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef OREGON_NGRID_H
@@ -23,7 +23,7 @@
 #include "GameSystem/Grid.h"
 #include "GameSystem/GridReference.h"
 #include "Timer.h"
-#include "Util.h"
+#include "Utilities/Util.h"
 
 #define DEFAULT_VISIBILITY_NOTIFY_PERIOD      1000
 

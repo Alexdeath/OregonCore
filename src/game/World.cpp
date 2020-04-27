@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Common.h"
@@ -54,7 +54,7 @@
 #include "InstanceSaveMgr.h"
 #include "SmartAI.h"
 #include "TicketMgr.h"
-#include "Util.h"
+#include "Utilities/Util.h"
 #include "Language.h"
 #include "CreatureGroups.h"
 #include "Transports.h"
@@ -1258,6 +1258,7 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadNpcTextLocales();
     sObjectMgr.LoadPageTextLocales();
     sObjectMgr.LoadGossipMenuItemsLocales();
+    sObjectMgr.LoadPointOfInterestLocales();
     sObjectMgr.SetDBCLocaleIndex(GetDefaultDbcLocale());        // Get once for all the locale index of DBC language (console/broadcasts)
     sConsole.SetLoadingLabel(">>> Localization strings loaded");
 
@@ -1327,6 +1328,9 @@ void World::SetInitialWorldSettings()
     sConsole.SetLoadingLabel("Loading Reputation Spillover Data...");
     sObjectMgr.LoadReputationSpilloverTemplate();
 
+    sConsole.SetLoadingLabel("Loading Points Of Interest Data...");
+    sObjectMgr.LoadPointsOfInterest();
+
     sConsole.SetLoadingLabel("Loading Pet Create Spells...");
     sObjectMgr.LoadPetCreateSpells();
 
@@ -1366,8 +1370,8 @@ void World::SetInitialWorldSettings()
     sConsole.SetLoadingLabel("Checking Quest Disables");
     sDisableMgr.CheckQuestDisables();                       // must be after loading quests
 
-    sConsole.SetLoadingLabel("Loading Quests Relations...");
-    sObjectMgr.LoadQuestRelations();                            // must be after quest load
+    sConsole.SetLoadingLabel("Loading Quests Starters and Enders...");
+    sObjectMgr.LoadQuestStartersAndEnders();                    // must be after quest load
 
     sConsole.SetLoadingLabel("Loading Quest Pooling Data...");
     sPoolMgr.LoadQuestPools();

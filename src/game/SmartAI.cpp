@@ -12,7 +12,7 @@
 * more details.
 *
 * You should have received a copy of the GNU General Public License along
-* with this program. If not, see <http://www.gnu.org/licenses/>.
+* with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "DatabaseEnv.h"
@@ -149,8 +149,6 @@ bool SmartAI::LoadPath(uint32 entry)
 
 void SmartAI::PausePath(uint32 delay, bool forced)
 {
-    if (!HasEscortState(SMART_ESCORT_ESCORTING))
-        return;
     if (HasEscortState(SMART_ESCORT_PAUSED))
     {
         sLog.outError("SmartAI::StartPath: Creature entry %u wanted to pause waypoint movement while already paused, ignoring.", me->GetEntry());
@@ -171,9 +169,6 @@ void SmartAI::PausePath(uint32 delay, bool forced)
 
 void SmartAI::StopPath(uint32 DespawnTime, uint32 quest, bool fail)
 {
-    if (!HasEscortState(SMART_ESCORT_ESCORTING))
-        return;
-
     if (quest)
         mEscortQuestID = quest;
     SetDespawnTime(DespawnTime);
@@ -218,6 +213,8 @@ void SmartAI::EndPath(bool fail)
                 for (GroupReference* groupRef = group->GetFirstMember(); groupRef != NULL; groupRef = groupRef->next())
                 {
                     Player* groupGuy = groupRef->GetSource();
+                    if (!groupGuy->IsInMap(player))
+                        continue;
 
                     if (!fail && groupGuy->IsAtGroupRewardDistance(me) && !groupGuy->GetCorpse())
                         groupGuy->AreaExploredOrEventHappens(mEscortQuestID);
@@ -260,8 +257,6 @@ void SmartAI::ReturnToLastOOCPos()
 
 void SmartAI::UpdatePath(const uint32 diff)
 {
-    if (!HasEscortState(SMART_ESCORT_ESCORTING))
-        return;
     if (mEscortInvokerCheckTimer < diff)
     {
         if (!IsEscortInvokerInRange())
@@ -368,7 +363,7 @@ bool SmartAI::IsEscortInvokerInRange()
                 {
                     Player* groupGuy = groupRef->GetSource();
 
-                    if (me->GetDistance(groupGuy) <= SMART_ESCORT_MAX_PLAYER_DIST)
+                    if (groupGuy->IsInMap(player) && me->GetDistance(groupGuy) <= SMART_ESCORT_MAX_PLAYER_DIST)
                         return true;
                 }
             }
@@ -458,11 +453,6 @@ void SmartAI::MoveInLineOfSight(Unit* who)
     CreatureAI::MoveInLineOfSight(who);
 }
 
-bool SmartAI::CanAIAttack(const Unit* /*who*/) const
-{
-    return !(me->HasReactState(REACT_PASSIVE));
-}
-
 bool SmartAI::AssistPlayerInCombat(Unit* who)
 {
     if (!who || !who->GetVictim())
@@ -505,7 +495,7 @@ void SmartAI::JustRespawned()
     mDespawnState = 0;
     mEscortState = SMART_ESCORT_NONE;
     me->SetVisible(true);
-    if (me->getFaction() != me->GetCreatureTemplate()->faction)
+    if (me->GetFaction() != me->GetCreatureTemplate()->faction)
         me->RestoreFaction();
     mJustReset = true;
     JustReachedHome();
@@ -638,8 +628,10 @@ void SmartAI::PassengerBoarded(Unit* who, int8 seatId, bool apply)
 void SmartAI::InitializeAI()
 {
     GetScript()->OnInitialize(me);
+
     if (!me->isDead())
-    mJustReset = true;
+        mJustReset = true;
+
     JustReachedHome();
     GetScript()->ProcessEventsFor(SMART_EVENT_RESPAWN);
 }
@@ -703,7 +695,7 @@ void SmartAI::sGossipSelect(Player* player, uint32 sender, uint32 action)
 
 void SmartAI::sGossipSelectCode(Player* /*player*/, uint32 /*sender*/, uint32 /*action*/, const char* /*code*/) { }
 
-void SmartAI::sQuestAccept(Player* player, Quest const* quest)
+void SmartAI::QuestAccept(Player* player, Quest const* quest)
 {
     GetScript()->ProcessEventsFor(SMART_EVENT_ACCEPTED_QUEST, player, quest->GetQuestId());
 }
@@ -822,7 +814,9 @@ void SmartGameObjectAI::UpdateAI(uint32 diff)
 void SmartGameObjectAI::InitializeAI()
 {
     GetScript()->OnInitialize(go);
-    GetScript()->ProcessEventsFor(SMART_EVENT_RESPAWN);
+    // do not call respawn event if go is not spawned
+    if (go->isSpawned())
+        GetScript()->ProcessEventsFor(SMART_EVENT_RESPAWN);
     //Reset();
 }
 

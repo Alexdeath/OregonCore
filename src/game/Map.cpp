@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Map.h"
@@ -156,11 +156,11 @@ void Map::LoadMap(int gx, int gy, bool reload)
     {
         sLog.outDetail("Unloading previously loaded map %u before reloading.", GetId());
         delete (GridMaps[gx][gy]);
-        GridMaps[gx][gy] = NULL;
+        GridMaps[gx][gy] = nullptr;
     }
 
     // map file name
-    char* tmp = NULL;
+    char* tmp = nullptr;
     int len = sWorld.GetDataPath().length() + strlen("maps/%03u%02u%02u.map") + 1;
     tmp = new char[len];
     snprintf(tmp, len, (char*)(sWorld.GetDataPath() + "maps/%03u%02u%02u.map").c_str(), GetId(), gx, gy);
@@ -1042,9 +1042,10 @@ bool GridMap::loadData(const char* filename)
     unloadData();
 
     map_fileheader header;
+    // Not return error if file not found
     FILE* in = fopen(filename, "rb");
     if (!in)
-        return false;
+        return true;
 
     if (fread(&header, sizeof(header), 1, in) != 1)
     {
@@ -1478,23 +1479,24 @@ inline ZLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 R
 
     // Check water type in cell
     int idx=(x_int>>3)*16 + (y_int>>3);
-    uint8 type = _liquidFlags ? _liquidFlags[idx] : m_liquidType;
+    uint8 type = _liquidFlags ? _liquidFlags[idx] : 1 <<  m_liquidType;
     uint32 entry = 0;
     if (_liquidEntry)
     {
         if (LiquidTypeEntry const* liquidEntry = sLiquidTypeStore.LookupEntry(_liquidEntry[idx]))
         {
             entry = liquidEntry->Id;
-            type &= MAP_LIQUID_TYPE_DARK_WATER;
             uint32 liqTypeIdx = liquidEntry->Type;
-            if (entry < 21)
+            if ((entry < 21) && (type & MAP_LIQUID_TYPE_WATER))
             {
+                // only basic liquid stored in maps actualy so in some case we need to override type depend on area
+                // actualy only Hyjal Mount and Coilfang raid be overrided here
                 if (AreaTableEntry const* area = GetAreaEntryByAreaFlagAndMap(getArea(x, y), MAPID_INVALID))
                 {
-                    uint32 overrideLiquid = area->LiquidTypeOverride[liquidEntry->Type];
+                    uint32 overrideLiquid = area->LiquidTypeOverride;
                     if (!overrideLiquid && area->zone)
                         if (area = GetAreaEntryByAreaID(area->zone))
-                            overrideLiquid = area->LiquidTypeOverride[liquidEntry->Type];
+                            overrideLiquid = area->LiquidTypeOverride;
 
                     if (LiquidTypeEntry const* liq = sLiquidTypeStore.LookupEntry(overrideLiquid))
                     {
@@ -1504,7 +1506,7 @@ inline ZLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 R
                 }
             }
 
-            type |= 1 << liqTypeIdx;
+            type |= (1 << liqTypeIdx) | (type & MAP_LIQUID_TYPE_DARK_WATER);
         }
     }
 
@@ -1739,36 +1741,19 @@ ZLiquidStatus Map::getLiquidStatus(float x, float y, float z, uint8 ReqLiquidTyp
             // All ok in water -> store data
             if (data)
             {
-                // hardcoded in client like this
+                //  hardcoded in client like this convert ocean to lava
                 if (GetId() == 530 && liquid_type == 2)
-                    liquid_type = 15;
+                    liquid_type = 3;
 
                 uint32 liquidFlagType = 0;
                 if (LiquidTypeEntry const* liq = sLiquidTypeStore.LookupEntry(liquid_type))
-                    liquidFlagType = liq->Type;
-
-                if (liquid_type && liquid_type < 21)
-                {
-                    if (AreaTableEntry const* area = GetAreaEntryByAreaFlagAndMap(GetAreaFlag(x, y, z), GetId()))
-                    {
-                        uint32 overrideLiquid = area->LiquidTypeOverride[liquidFlagType];
-                        if (!overrideLiquid && area->zone)
-                            if (area = GetAreaEntryByAreaID(area->zone))
-                                overrideLiquid = area->LiquidTypeOverride[liquidFlagType];
-
-                        if (LiquidTypeEntry const* liq = sLiquidTypeStore.LookupEntry(overrideLiquid))
-                        {
-                            liquid_type = overrideLiquid;
-                            liquidFlagType = liq->Type;
-                        }
-                    }
-                }
+                    liquidFlagType = 1 << liq->Type;
 
                 data->level = liquid_level;
                 data->depth_level = ground_level;
 
                 data->entry = liquid_type;
-                data->type_flags = 1 << liquidFlagType;
+                data->type_flags = liquidFlagType;
             }
 
             // For speed check as int values
@@ -1868,6 +1853,19 @@ bool Map::IsUnderWater(float x, float y, float z) const
         if (getLiquidStatus(x, y, z, MAP_LIQUID_TYPE_WATER | MAP_LIQUID_TYPE_OCEAN)&LIQUID_MAP_UNDER_WATER)
             return true;
     }
+    return false;
+}
+
+bool Map::IsSwimmable(float x, float y, float z, LiquidData* data) const
+{
+    LiquidData liquid_status;
+    LiquidData* liquid_ptr = data ? data : &liquid_status;
+    if (getLiquidStatus(x, y, z, MAP_ALL_LIQUIDS, liquid_ptr) & (LIQUID_MAP_IN_WATER | LIQUID_MAP_UNDER_WATER))
+    {
+        if (liquid_ptr->level - liquid_ptr->depth_level > 1.5f)
+            return true;
+    }
+
     return false;
 }
 

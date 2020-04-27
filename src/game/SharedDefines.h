@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef OREGON_SHAREDDEFINES_H
@@ -420,9 +420,9 @@ const uint32 ItemQualityColors[MAX_ITEM_QUALITY] =
 // Spell Attributes definitions
 // ***********************************
 
-enum SpellAttr0
+enum SpellAttributes
 {
-    SPELL_ATTR0_UNK0                             = 0x00000001, // 0
+    SPELL_ATTR0_DONT_DISPLAY_SPELL_RESULT        = 0x00000001, // 0
     SPELL_ATTR0_RANGED                           = 0x00000002, // 1 All ranged abilities have this flag
     SPELL_ATTR0_ON_NEXT_SWING_1                  = 0x00000004, // 2 on next swing
     SPELL_ATTR0_UNK3                             = 0x00000008, // 3 not set in 2.4.2
@@ -456,7 +456,7 @@ enum SpellAttr0
     SPELL_ATTR0_CANT_CANCEL                      = 0x80000000  // 31 positive aura can't be canceled
 };
 
-enum SpellAttr1
+enum SpellAttributesEx
 {
     SPELL_ATTR1_DISMISS_PET                      = 0x00000001, // 0 for spells without this flag client doesn't allow to summon pet if caster has a pet
     SPELL_ATTR1_DRAIN_ALL_POWER                  = 0x00000002, // 1 use all power (Only paladin Lay of Hands and Bunyanize)
@@ -492,7 +492,7 @@ enum SpellAttr1
     SPELL_ATTR1_UNK31                            = 0x80000000  // 31
 };
 
-enum SpellAttr2
+enum SpellAttributesEx2
 {
     SPELL_ATTR2_CAN_TARGET_DEAD                  = 0x00000001, // 0 can target dead unit or corpse
     SPELL_ATTR2_UNK1                             = 0x00000002, // 1 Used by shadowform, ghost wolf, vanish
@@ -528,7 +528,7 @@ enum SpellAttr2
     SPELL_ATTR2_FOOD                             = 0x80000000  // 31 food, well-fed, and a few others
 };
 
-enum SpellAttr3
+enum SpellAttributesEx3
 {
     SPELL_ATTR3_UNK0                             = 0x00000001, // 0
     SPELL_ATTR3_UNK1                             = 0x00000002, // 1
@@ -564,7 +564,7 @@ enum SpellAttr3
     SPELL_ATTR3_UNK31                            = 0x80000000  // 31
 };
 
-enum SpellAttr4
+enum SpellAttributesEx4
 {
     SPELL_ATTR4_IGNORE_RESISTANCES               = 0x00000001, // 0 spells with this attribute will completely ignore the target's resistance (these spells can't be resisted)
     SPELL_ATTR4_PROC_ONLY_ON_CASTER              = 0x00000002, // 1 proc only on effects with TARGET_UNIT_CASTER?
@@ -586,7 +586,7 @@ enum SpellAttr4
     SPELL_ATTR4_USABLE_IN_ARENA                  = 0x00020000, // 17 usable in arena
     SPELL_ATTR4_AREA_TARGET_CHAIN                = 0x00040000, // 18 [NYI] hits area targets one after another instead of all at once
     SPELL_ATTR4_UNK19                            = 0x00080000, // 19
-    SPELL_ATTR4_UNK20                            = 0x00100000, // 20
+    SPELL_ATTR4_UNK20                            = 0x00100000, // 20 do not give "more powerful spell" error message
     SPELL_ATTR4_STANCES                          = 0x00200000, // 21 stances, shapeshifts, etc.
     SPELL_ATTR4_UNK22                            = 0x00400000, // 22 used by seal of command (20424,42058)
     SPELL_ATTR4_CANT_TRIGGER_ITEM_SPELLS         = 0x00800000, // 23 Used by spells that cannot trigger item procs such as enchants
@@ -600,7 +600,7 @@ enum SpellAttr4
     SPELL_ATTR4_UNK31                            = 0x80000000  // 31 Polymorph: Chicken (228), Sonic Boom (38052,38488)
 };
 
-enum SpellAttr5
+enum SpellAttributesEx5
 {
     SPELL_ATTR5_CAN_CHANNEL_WHEN_MOVING          = 0x00000001, // 0 don't interrupt channeling spells when moving
     SPELL_ATTR5_NO_REAGENT_WHILE_PREP            = 0x00000002, // 1 not need reagents if UNIT_FLAG_PREPARATION
@@ -625,7 +625,7 @@ enum SpellAttr5
     SPELL_ATTR5_SPECIAL_MOUNT                    = 0x00100000, // 20 used by mount transformators, also by black qiraji and dragonmaw illusion
     SPELL_ATTR5_UNK21                            = 0x00200000, // 21 used by demonice sacrifice, BM Only OFF/ON, BM OFF, Terun Rift, "Damage", Rocket Bot Attack
     SPELL_ATTR5_UNK22                            = 0x00400000, // 22 used by spells Hex Lord Malacrass casts (player based), Hex Lord Adds also and also Flame Wreath from Aran
-    SPELL_ATTR5_UNK23                            = 0x00800000, // 23 used by ignite, shadow work: death
+    SPELL_ATTR_EX5_DOT_IGNORE_RESILIENCE         = 0x00800000, // 23 Damage over Time spells that are not affected by Resilience have this attribute
     SPELL_ATTR5_UNK24                            = 0x01000000, // 24
     SPELL_ATTR5_UNK25                            = 0x02000000, // 25 used by one spell - Death Lightning, doesn't seem to be used anywhere
     SPELL_ATTR5_UNK26                            = 0x04000000, // 26 used by thunder clap and seed of corruption
@@ -636,7 +636,7 @@ enum SpellAttr5
     SPELL_ATTR5_TAUNT                            = 0x80000000  // 31 Forces all nearby enemies to focus attacks to caster Taunt, Challenging Roar, etc.
 };
 
-enum SpellAttr6
+enum SpellAttributesEx6
 {
     SPELL_ATTR6_UNK0                             = 0x00000001, // 0 Only Move spell have this flag
     SPELL_ATTR6_UNK1                             = 0x00000002, // 1 not set in 2.4.2
@@ -644,12 +644,12 @@ enum SpellAttr6
     SPELL_ATTR6_ASSIST_IGNORE_IMMUNE_FLAG        = 0x00000008, // 3 [NYI] skips checking UNIT_FLAG_IMMUNE_TO_PC and UNIT_FLAG_IMMUNE_TO_NPC flags on assist
     SPELL_ATTR6_UNK4                             = 0x00000010, // 4 not set in 2.4.2
     SPELL_ATTR6_UNK5                             = 0x00000020, // 5
-    SPELL_ATTR6_UNK6                             = 0x00000040, // 6
+    SPELL_ATTR6_CAN_TARGET_INVISIBLE             = 0x00000040, // 6 not set in 2.4.3
     SPELL_ATTR6_UNK7                             = 0x00000080, // 7
-    SPELL_ATTR6_UNK8                             = 0x00000100, // 8
+    SPELL_ATTR_EX6_CANT_TARGET_CROWD_CONTROLLED  = 0x00000100, // 8
     SPELL_ATTR6_UNK9                             = 0x00000200, // 9 not set in 2.4.2
     SPELL_ATTR6_UNK10                            = 0x00000400, // 10
-    SPELL_ATTR6_UNK11                            = 0x00000800, // 11
+    SPELL_ATTR6_NOT_IN_RAID_INSTANCE             = 0x00000800, // 11
     SPELL_ATTR6_UNK12                            = 0x00001000, // 12 not set in 2.4.2
     SPELL_ATTR6_UNK13                            = 0x00002000, // 13 not set in 2.4.2
     SPELL_ATTR6_UNK14                            = 0x00004000, // 14 not set in 2.4.2
@@ -667,7 +667,7 @@ enum SpellAttr6
     SPELL_ATTR6_UNK26                            = 0x04000000, // 26 not set in 2.4.2
     SPELL_ATTR6_UNK27                            = 0x08000000, // 27 not set in 2.4.2
     SPELL_ATTR6_UNK28                            = 0x10000000, // 28 not set in 2.4.2
-    SPELL_ATTR6_UNK29                            = 0x20000000, // 29 not set in 2.4.2
+    SPELL_ATTR6_NO_DMG_PERCENT_MODS              = 0x20000000, // 29 not set in 2.4.2
     SPELL_ATTR6_UNK30                            = 0x40000000, // 30 not set in 2.4.2
     SPELL_ATTR6_UNK31                            = 0x80000000  // 31 not set in 2.4.2
 };
@@ -744,6 +744,7 @@ enum TeamId
 
 enum Team
 {
+    TEAM_NONE           = 0,                                // if ReputationListId > 0 && Flags != FACTION_FLAG_TEAM_HEADER
     HORDE               = 67,
     ALLIANCE            = 469,
     //TEAM_STEAMWHEEDLE_CARTEL = 169,                       // not used in code
@@ -751,11 +752,11 @@ enum Team
     //TEAM_HORDE_FORCES        = 892,
     //TEAM_SANCTUARY           = 936,
     //TEAM_OUTLAND             = 980,
-    TEAM_OTHER          = 0,                                // if ReputationListId > 0 && Flags != FACTION_FLAG_TEAM_HEADER
 };
 
 enum SpellEffects
 {
+    SPELL_EFFECT_NONE                      = 0,
     SPELL_EFFECT_INSTAKILL                 = 1,
     SPELL_EFFECT_SCHOOL_DAMAGE             = 2,
     SPELL_EFFECT_DUMMY                     = 3,
@@ -1139,7 +1140,7 @@ enum SpellCastTargetFlags
     TARGET_FLAG_OBJECT          = 0x00000800,               // pguid
     TARGET_FLAG_TRADE_ITEM      = 0x00001000,               // pguid
     TARGET_FLAG_STRING          = 0x00002000,               // string
-    TARGET_FLAG_UNK1            = 0x00004000,               // ?
+    TARGET_FLAG_GAMEOBJECT_ITEM = 0x00004000,               // 199 spells, opening object/lock
     TARGET_FLAG_CORPSE          = 0x00008000,               // pguid
     TARGET_FLAG_UNK2            = 0x00010000                // pguid
 };
@@ -1762,7 +1763,8 @@ enum Emote
     EMOTE_ONESHOT_CUSTOMSPELL10        = 411,
     EMOTE_STATE_EXCLAIM                = 412,
     EMOTE_STATE_SIT_CHAIR_MED          = 415,
-    EMOTE_STATE_SPELLEFFECT_HOLD       = 422
+    EMOTE_STATE_SPELLEFFECT_HOLD       = 422,
+    EMOTE_STATE_EAT_NO_SHEATHE         = 423
 };
 
 enum Anim
@@ -2202,6 +2204,8 @@ inline uint8 ClassByQuestSort(int32 QuestSort)
 
 enum SkillType
 {
+    SKILL_NONE                     = 0,
+
     SKILL_FROST                    = 6,
     SKILL_FIRE                     = 8,
     SKILL_ARMS                     = 26,
@@ -2343,6 +2347,19 @@ enum SkillType
 };
 
 #define MAX_SKILL_TYPE               770
+
+inline SkillType SkillByLockType(LockType locktype)
+{
+    switch (locktype)
+    {
+        case LOCKTYPE_PICKLOCK:    return SKILL_LOCKPICKING;
+        case LOCKTYPE_HERBALISM:   return SKILL_HERBALISM;
+        case LOCKTYPE_MINING:      return SKILL_MINING;
+        case LOCKTYPE_FISHING:     return SKILL_FISHING;
+        default: break;
+    }
+    return SKILL_NONE;
+}
 
 inline uint32 SkillByQuestSort(int32 QuestSort)
 {

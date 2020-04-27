@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -118,7 +118,7 @@ bool QuestAccept_npc_galen_goodward(Player* pPlayer, Creature* pCreature, const 
 {
     if (pQuest->GetQuestId() == QUEST_GALENS_ESCAPE)
     {
-        pCreature->setFaction(113);
+        pCreature->SetFaction(113);
         DoScriptText(GILAN_SAY_START_1, pCreature);
         pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
 
@@ -142,6 +142,6 @@ void AddSC_swamp_of_sorrows()
     newscript = new Script;
     newscript->Name = "npc_galen_goodward";
     newscript->GetAI = &GetAI_npc_galen_goodward;
-    newscript->pQuestAccept = &QuestAccept_npc_galen_goodward;
+    newscript->QuestAccept = &QuestAccept_npc_galen_goodward;
     newscript->RegisterSelf();
 }

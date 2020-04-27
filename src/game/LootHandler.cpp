@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Common.h"
@@ -27,7 +27,7 @@
 #include "Object.h"
 #include "Group.h"
 #include "World.h"
-#include "Util.h"
+#include "Utilities/Util.h"
 
 void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
 {
@@ -261,7 +261,7 @@ void WorldSession::HandleLootOpcode(WorldPacket& recv_data)
     recv_data >> guid;
 
     // Check possible cheat
-    if (!_player->IsAlive())
+    if (!GetPlayer()->IsAlive())
         return;
 
     GetPlayer()->SendLoot(guid, LOOT_CORPSE);
@@ -422,7 +422,7 @@ void WorldSession::DoLootRelease(uint64 lguid)
     {
         Creature* pCreature = GetPlayer()->GetMap()->GetCreature(lguid);
 
-        bool ok_loot = pCreature && pCreature->IsAlive() == (player->getClass() == CLASS_ROGUE && pCreature->loot.loot_type == LOOT_SKINNING);
+        bool ok_loot = pCreature && pCreature->IsAlive() == (player->getClass() == CLASS_ROGUE && pCreature->loot.loot_type == LOOT_PICKPOCKETING);
         if (!ok_loot || !pCreature->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
             return;
 

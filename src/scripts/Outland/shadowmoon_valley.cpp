@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -228,7 +228,7 @@ struct mob_enslaved_netherwing_drakeAI : public ScriptedAI
     void Reset()
     {
         if (!Tapped)
-            me->setFaction(FACTION_DEFAULT);
+            me->SetFaction(FACTION_DEFAULT);
 
         FlyTimer = 10000;
         me->SetLevitate(false);
@@ -247,7 +247,7 @@ struct mob_enslaved_netherwing_drakeAI : public ScriptedAI
             Tapped = true;
             PlayerGUID = caster->GetGUID();
 
-            me->setFaction(FACTION_FRIENDLY);
+            me->SetFaction(FACTION_FRIENDLY);
             DoCast(caster, SPELL_FORCE_OF_NELTHARAKU, true);
 
             Unit* Dragonmaw = me->FindNearestCreature(CREATURE_DRAGONMAW_SUBJUGATOR, 50);
@@ -440,7 +440,7 @@ CreatureAI* GetAI_mob_dragonmaw_peon(Creature* pCreature)
 
 bool GossipHello_npc_drake_dealer_hurlunk(Player* player, Creature* pCreature)
 {
-    if (pCreature->isVendor() && player->GetReputationRank(1015) == REP_EXALTED)
+    if (pCreature->IsVendor() && player->GetReputationRank(1015) == REP_EXALTED)
         player->ADD_GOSSIP_ITEM(1, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
 
     player->SEND_GOSSIP_MENU(player->GetGossipTextId(pCreature), pCreature->GetGUID());
@@ -572,7 +572,7 @@ bool GossipSelect_npc_murkblood_overseer(Player* player, Creature* pCreature, ui
 
 bool GossipHello_npc_neltharaku(Player* player, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         player->PrepareQuestMenu(pCreature->GetGUID());
 
     if (player->GetQuestStatus(10814) == QUEST_STATUS_INCOMPLETE)
@@ -657,9 +657,9 @@ CreatureAI* GetAI_npc_oronok_tornheart(Creature* pCreature)
 
 bool GossipHello_npc_oronok_tornheart(Player* player, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         player->PrepareQuestMenu(pCreature->GetGUID());
-    if (pCreature->isVendor())
+    if (pCreature->IsVendor())
         player->ADD_GOSSIP_ITEM(1, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
 
     if (player->GetQuestStatus(10519) == QUEST_STATUS_INCOMPLETE)
@@ -792,27 +792,27 @@ bool QuestAccept_npc_karynaku(Player* player, Creature* creature, Quest const* q
 #define SPELL_ONE 39990 // Red Lightning Bolt
 #define SPELL_TWO 41528 // Mark of Stormrage
 #define SPELL_THREE 40216 // Dragonaw Faction
-#define SPELL_FOUR 42016 // Dragonaw Trasform
+#define SPELL_FOUR 42016 // Dragonaw Transform
 
-#define OVERLORD_SAY_1 -1000206
-#define OVERLORD_SAY_2 -1000207
-#define OVERLORD_SAY_3 -1000208
-#define OVERLORD_SAY_4 -1000209
-#define OVERLORD_SAY_5 -1000210
-#define OVERLORD_SAY_6 -1000211
+#define OVERLORD_SAY_1 -1910204
+#define OVERLORD_SAY_2 -1910206
+#define OVERLORD_SAY_3 -1910208
+#define OVERLORD_SAY_4 -1910210
+#define OVERLORD_SAY_5 -1910217
+#define OVERLORD_SAY_6 -1910218
 
-#define OVERLORD_YELL_1 -1000212
-#define OVERLORD_YELL_2 -1000213
+#define OVERLORD_YELL_1 -1910205
+#define OVERLORD_YELL_2 -1910207
 
-#define LORD_ILLIDAN_SAY_1 -1000214
-#define LORD_ILLIDAN_SAY_2 -1000215
-#define LORD_ILLIDAN_SAY_3 -1000216
-#define LORD_ILLIDAN_SAY_4 -1000217
-#define LORD_ILLIDAN_SAY_5 -1000218
-#define LORD_ILLIDAN_SAY_6 -1000219
-#define LORD_ILLIDAN_SAY_7 -1000220
+#define LORD_ILLIDAN_SAY_1 -1910209
+#define LORD_ILLIDAN_SAY_2 -1910211
+#define LORD_ILLIDAN_SAY_3 -1910212
+#define LORD_ILLIDAN_SAY_4 -1910213
+#define LORD_ILLIDAN_SAY_5 -1910214
+#define LORD_ILLIDAN_SAY_6 -1910215
+#define LORD_ILLIDAN_SAY_7 -1910216
 
-#define YARZILL_THE_MERC_SAY -1000221
+#define YARZILL_THE_MERC_SAY -1910219
 
 struct npc_overlord_morghorAI : public ScriptedAI
 {
@@ -823,6 +823,7 @@ struct npc_overlord_morghorAI : public ScriptedAI
 
     uint32 ConversationTimer;
     uint32 Step;
+	uint32 resetTimer;
 
     bool Event;
 
@@ -834,7 +835,10 @@ struct npc_overlord_morghorAI : public ScriptedAI
         ConversationTimer = 0;
         Step = 0;
 
+		resetTimer = 180000;
+		
         Event = false;
+		me->SetUInt32Value(UNIT_NPC_FLAGS, 2);
     }
 
     void EnterCombat(Unit* /*who*/) {}
@@ -843,18 +847,12 @@ struct npc_overlord_morghorAI : public ScriptedAI
     {
         me->SetUInt32Value(UNIT_NPC_FLAGS, 0);
         me->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
-        Unit* Illidan = me->SummonCreature(C_ILLIDAN, -5107.83f, 602.584f, 85.2393f, 4.92598f, TEMPSUMMON_CORPSE_DESPAWN, 0);
-        if (Illidan)
-        {
-            IllidanGUID = Illidan->GetGUID();
-            Illidan->SetVisible(false);
-        }
-        if (PlayerGUID)
-        {
-            Player* player = Unit::GetPlayer(*me, PlayerGUID);
-            if (player)
-                DoScriptText(OVERLORD_SAY_1, me, player);
-        }
+		Unit* Illidan = me->SummonCreature(C_ILLIDAN, -5107.83f, 602.584f, 85.2393f, 4.92598f, TEMPSUMMON_CORPSE_DESPAWN, 0);
+		if (Illidan)
+		{
+			IllidanGUID = Illidan->GetGUID();
+		}
+
         ConversationTimer = 4200;
         Step = 0;
         Event = true;
@@ -864,9 +862,9 @@ struct npc_overlord_morghorAI : public ScriptedAI
     {
         Player* plr = Unit::GetPlayer(*me, PlayerGUID);
 
-        Unit* Illi = Unit::GetUnit((*me), IllidanGUID);
+        Creature* Illi = Creature::GetCreature((*me), IllidanGUID);
 
-        if (!plr || !Illi)
+		if (!plr || (!Illi && Step < 23))
         {
             EnterEvadeMode();
             return 0;
@@ -877,8 +875,8 @@ struct npc_overlord_morghorAI : public ScriptedAI
         case 0:
             return 0;
             break;
-        case 1:
-            me->GetMotionMaster()->MovePoint(0, -5104.41f, 595.297f, 85.6838f);
+        case 1:		
+            me->GetMotionMaster()->MovePoint(0, -5104.41f, 595.297f, 85.6838f);			
             return 9000;
             break;
         case 2:
@@ -894,7 +892,6 @@ struct npc_overlord_morghorAI : public ScriptedAI
             return 2000;
             break;
         case 5:
-            Illi->SetVisible(true);
             Illi->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             return 350;
             break;
@@ -944,7 +941,6 @@ struct npc_overlord_morghorAI : public ScriptedAI
             if (plr)
             {
                 Illi->CastSpell(plr, SPELL_TWO, true);
-                plr->RemoveAurasDueToSpell(SPELL_THREE);
                 plr->RemoveAurasDueToSpell(SPELL_FOUR);
                 return 5000;
             }
@@ -978,8 +974,7 @@ struct npc_overlord_morghorAI : public ScriptedAI
             return 500;
             break;
         case 22:
-            Illi->SetVisible(false);
-            Illi->setDeathState(JUST_DIED);
+			Illi->DespawnOrUnsummon(10);           
             return 1000;
             break;
         case 23:
@@ -1008,8 +1003,7 @@ struct npc_overlord_morghorAI : public ScriptedAI
             }
             break;
         case 28:
-            plr->RemoveAurasDueToSpell(SPELL_TWO);
-            plr->RemoveAurasDueToSpell(41519);
+            plr->RemoveAurasDueToSpell(SPELL_TWO);      
             plr->CastSpell(plr, SPELL_THREE, true);
             plr->CastSpell(plr, SPELL_FOUR, true);
             return 1000;
@@ -1032,9 +1026,11 @@ struct npc_overlord_morghorAI : public ScriptedAI
             break;
         case 31:
             {
-                Unit* Yarzill = me->FindNearestCreature(C_YARZILL, 50);
+              /*  Unit* Yarzill = me->FindNearestCreature(C_YARZILL, 50);
                 if (Yarzill)
-                    Yarzill->CastSpell(plr, 41540, true);
+                    Yarzill->CastSpell(plr, 41540, true); */
+				plr->TeleportTo(530, -3924.051514f, 967.308044f, 22.454834f, 1.763926f);
+				plr->RemoveAurasDueToSpell(41519);
                 return 1000;
             }
             break;
@@ -1075,6 +1071,7 @@ bool QuestAccept_npc_overlord_morghor(Player* player, Creature* pCreature, const
 {
     if (_Quest->GetQuestId() == QUEST_LORD_ILLIDAN_STORMRAGE)
     {
+		pCreature->MonsterSay(OVERLORD_SAY_1, LANG_UNIVERSAL, player->GetGUID());
         ((npc_overlord_morghorAI*)pCreature->AI())->PlayerGUID = player->GetGUID();
         ((npc_overlord_morghorAI*)pCreature->AI())->StartEvent();
         return true;
@@ -1122,7 +1119,7 @@ struct npc_earthmender_wildaAI : public npc_escortAI
 
     void Reset()
     {
-        me->setFaction(1726);
+        me->SetFaction(1726);
         Completed = false;
     }
 
@@ -1290,7 +1287,7 @@ bool QuestAccept_npc_earthmender_wilda(Player* player, Creature* creature, Quest
 {
     if (quest->GetQuestId() == QUEST_ESCAPE_FROM_COILSKAR_CISTERN)
     {
-        creature->setFaction(113);
+        creature->SetFaction(113);
         if (npc_earthmender_wildaAI* pEscortAI = CAST_AI(npc_earthmender_wildaAI, creature->AI()))
             pEscortAI->Start(false, false, player->GetGUID(), quest);
     }
@@ -1632,7 +1629,7 @@ struct npc_lord_illidan_stormrageAI : public Scripted_NoMovementAI
             fLocZ = SpawnLocation[uiLocIndex + i].fLocZ;
             fOrient = SpawnLocation[uiLocIndex + i].fOrient;
 
-            if (Creature* pSpawn = me->SummonCreature(WavesInfo[m_uiWaveCount].uiCreatureId, fLocX, fLocY, fLocZ, fOrient, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 15000))
+            if (Creature* pSpawn = me->SummonCreature(WavesInfo[m_uiWaveCount].uiCreatureId, fLocX, fLocY, fLocZ, fOrient, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 90000))
             {
 
                 if (m_uiWaveCount)                          // only in first wave
@@ -1720,14 +1717,14 @@ struct npc_lord_illidan_stormrageAI : public Scripted_NoMovementAI
                     if (pMember->GetQuestStatus(QUEST_BATTLE_OF_THE_CRIMSON_WATCH) == QUEST_STATUS_FAILED)
                     {
                         ++uiFailedMemberCount;
-                        continue;
+                        continue;					
                     }
 
                     // we left event area fail quest
                     if (!pMember->IsWithinDistInMap(me, EVENT_AREA_RADIUS))
                     {
                         pMember->FailQuest(QUEST_BATTLE_OF_THE_CRIMSON_WATCH);
-                        ++uiFailedMemberCount;
+                        ++uiFailedMemberCount;					
                     }
                 }
             }
@@ -1806,9 +1803,11 @@ bool GOQuestAccept_GO_crystal_prison(Player* pPlayer, GameObject* /*pGo*/, Quest
     if (pQuest->GetQuestId() == QUEST_BATTLE_OF_THE_CRIMSON_WATCH )
         if (Creature* pLordIllidan = GetClosestCreatureWithEntry(pPlayer, NPC_LORD_ILLIDAN, 50.0))
             if (npc_lord_illidan_stormrageAI* pIllidanAI = dynamic_cast<npc_lord_illidan_stormrageAI*>(pLordIllidan->AI()))
-                if (!pIllidanAI->m_bEventStarted)
-                    pIllidanAI->StartEvent(pPlayer);
-
+				if (!pIllidanAI->m_bEventStarted)
+				{
+					pIllidanAI->Reset();
+					pIllidanAI->StartEvent(pPlayer);
+				}
     return true;
 }
 
@@ -1909,7 +1908,7 @@ struct npc_enraged_spiritAI : public ScriptedAI
             totemOspirits = me->FindNearestCreature(ENTRY_TOTEM_OF_SPIRITS, RADIUS_TOTEM_OF_SPIRITS);
             if (totemOspirits)
             {
-                Summoned->setFaction(ENRAGED_SOUL_FRIENDLY);
+                Summoned->SetFaction(ENRAGED_SOUL_FRIENDLY);
                 Summoned->GetMotionMaster()->MovePoint(0, totemOspirits->GetPositionX(), totemOspirits->GetPositionY(), Summoned->GetPositionZ());
 
                 Player* Owner = (Player*)totemOspirits->GetOwner();
@@ -1987,6 +1986,10 @@ bool GossipSelect_npc_grand_commander_ruusk(Player* player, Creature* _Creature,
 
 enum Azaloth
 {
+	// Quests
+	QUEST_A_NECESSARY_DISTRACTION_ALDOR = 10637,
+	QUEST_A_NECESSARY_DISTRACTION_SCRYERS = 10688,
+
     // NPCs
     NPC_SUNFURY_WARLOCK     = 21503,
     NPC_AZALOTH             = 21506,
@@ -2005,47 +2008,44 @@ enum Azaloth
 struct npc_azalothAI : public ScriptedAI
 {
 	bool free;
-	uint64 PlayerGUID;
 
 	uint32 cleaveTimer;
 	uint32 crippleTimer;
 	uint32 warstompTimer;
 	uint32 rainOfFireTimer;
-	uint32 banishTimer;
 
 	void Reset()
 	{
 		free = false;
-		PlayerGUID = 0;
+
 		me->CombatStop();
 		me->DeleteThreatList();
 		me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC); // passive
 		me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
 		me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
-		me->setFaction(1813);
+		me->SetFaction(1813);
 
 		cleaveTimer = 6000;
 		crippleTimer = 1000;
 		rainOfFireTimer = 15000;
 		warstompTimer = 10000;
-		banishTimer = 60000;
 	}
 
 	npc_azalothAI(Creature* c) : ScriptedAI(c){}
+	
+	/* SPELL 37834 IS BROKEN, UNQOUTE PART BELOW WHEN SPELL IS FIXED */
 
+	/*
 	void SpellHit(Unit* caster, const SpellEntry* spell)
 	{
 		if (caster->GetTypeId() == TYPEID_PLAYER && spell->Id == 37834 && !free)
 		{
-			if (me->HasAura(37833, 0))
-				me->RemoveAurasDueToSpell(37833);
-
-			free = true;
-			PlayerGUID = caster->GetGUID();
+			me->RemoveAurasDueToSpell(SPELL_BANISH);
 			me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC); // passive
 			me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
 			me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);		
-			me->setFaction(954);
+			me->SetFaction(954);
+			free = true;
 
 			Unit* Warlock = me->FindNearestCreature(21503, 50);
 
@@ -2057,6 +2057,7 @@ struct npc_azalothAI : public ScriptedAI
 			DoMeleeAttackIfReady();
 		}
 	}
+	*/
 
 	void UpdateAI(const uint32 diff)
 	{
@@ -2069,18 +2070,6 @@ struct npc_azalothAI : public ScriptedAI
 
 		if (UpdateVictim())
 		{
-			if (banishTimer < diff)
-			{
-				DoCast(SPELL_BANISH);
-				banishTimer = 60000;
-			}
-
-			if (!UpdateVictim())
-			{
-				banishTimer -= diff;
-				return;
-			}
-
 			if (cleaveTimer < diff)
 			{
 				DoCastVictim(SPELL_CLEAVE);
@@ -2189,7 +2178,7 @@ struct legion_infernal_summon_triggerAI : public ScriptedAI
 	void Reset()
 	{
 		me->SetCanFly(true);
-		me->canFly();
+		me->CanFly();
 		infernal_summon_timer = 5000;
 	}
 
@@ -2305,7 +2294,7 @@ struct npc_deathbringer_jovaanAI : public ScriptedAI
 
 	void Reset()
 	{		
-		me->setFaction(7);
+		me->SetFaction(7);
 		Image = true;
 		uiPlayerGUID = 0;
 		uiStepsTimer = 0;
@@ -2352,7 +2341,7 @@ struct npc_deathbringer_jovaanAI : public ScriptedAI
 			pInfernalTrap->UpdateObjectVisibility();
 			return 500;
 		case 3:
-			me->setFaction(35);
+			me->SetFaction(35);
 			me->SummonCreature(NPC_WARBRINGER, -3300.479f, 2927.177f, 173.894f, 2.5f, TEMPSUMMON_TIMED_DESPAWN, 60000);
 			return 1000;
 		case 4:
@@ -2856,7 +2845,7 @@ struct npc_karsius_the_ancient_watcherAI : public ScriptedAI
 			{
 				if (Combat_Timer <= diff)
 				{
-					me->setFaction(14);
+					me->SetFaction(14);
 					me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
 					if (Creature* teron = me->FindNearestCreature(21867, 100.0f, true))
@@ -3410,13 +3399,13 @@ struct npc_envoy_icariusAI : public ScriptedAI
 	{
         me->SetVisible(false);
 		me->GetMotionMaster()->MoveTargetedHome();
-		me->setFaction(14);
+		me->SetFaction(14);
 		me->SetReactState(REACT_DEFENSIVE);
 		me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
 		if (Creature* zarath = me->FindNearestCreature(21410, 30.0f, true))
 		{
-			zarath->setFaction(35);
+			zarath->SetFaction(35);
             me->SetVisible(false);
 			zarath->GetMotionMaster()->MoveTargetedHome();
 		}
@@ -3455,7 +3444,7 @@ struct npc_envoy_icariusAI : public ScriptedAI
 
 					if (Creature* zarath = me->FindNearestCreature(21410, 30.0f, true))
 					{
-						zarath->setFaction(14);
+						zarath->SetFaction(14);
 						zarath->SetVisible(true);
 						zarath->GetMotionMaster()->MovePoint(0, -4062.35f, 1517.71f, 91.783f);
 					}
@@ -3626,9 +3615,8 @@ struct npc_guldanAI : public ScriptedAI
 		Creature* pOronok = me->FindNearestCreature(NPC_ORONOK, 90);
 		Creature* pBorak = me->FindNearestCreature(NPC_BORAK, 90);
 		Creature* pGromtor = me->FindNearestCreature(NPC_GROMTOR, 90);
-		Creature* pTrigger = me->FindNearestCreature(61037, 90);
 
-		if (!pCyrukh && !pSpirit && !pTrigger)
+		if (!pCyrukh && !pSpirit)
 		{
 			Reset();
 			return 0;
@@ -3670,7 +3658,10 @@ struct npc_guldanAI : public ScriptedAI
 			DoScriptText(GULDAN_5, me);
 			return 1000;
 		case 10:
-			pTrigger->MonsterYellToZone(ORONOK_1, LANG_UNIVERSAL, playerGUID);
+            if (pOronok = me->SummonCreature(NPC_ORONOK, -3605.26f, 1924.91f, 49.53f, 4.88f, TEMPSUMMON_MANUAL_DESPAWN, 0))
+                pOronok->MonsterYellToZone(ORONOK_1, LANG_UNIVERSAL, playerGUID);
+            me->SummonCreature(NPC_BORAK, -3601.04f, 1928.46f, 50.054f, 4.85f, TEMPSUMMON_MANUAL_DESPAWN, 0);
+            me->SummonCreature(NPC_GROMTOR, -3609.73f, 1926.59f, 50.007f, 4.88f, TEMPSUMMON_MANUAL_DESPAWN, 0);
 			return 5000;
 		case 11:
 			if (me->HasAura(SPELL_GULDAN_CHANNEL))
@@ -3682,11 +3673,6 @@ struct npc_guldanAI : public ScriptedAI
 			me->SetStandState(UNIT_STAND_STATE_KNEEL);
 			return 10000;
 		case 13:
-			me->SummonCreature(NPC_ORONOK, -3605.26f, 1924.91f, 49.53f, 4.88f, TEMPSUMMON_MANUAL_DESPAWN, 0);
-			me->SummonCreature(NPC_BORAK, -3601.04f, 1928.46f, 50.054f, 4.85f, TEMPSUMMON_MANUAL_DESPAWN, 0);
-			me->SummonCreature(NPC_GROMTOR, -3609.73f, 1926.59f, 50.007f, 4.88f, TEMPSUMMON_MANUAL_DESPAWN, 0);
-			return 500;
-		case 14:
 			pOronok->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 			pOronok->GetMotionMaster()->MovePath(608608600, false);
 			pBorak->GetMotionMaster()->MovePath(608608601, false);
@@ -3875,7 +3861,7 @@ struct npc_oronokAI : public ScriptedAI
 					if (Creature* cyrukh = me->FindNearestCreature(NPC_CYRUKH, 100.0f, true))
 					{
 						cyrukh->MonsterYell(CYRUKH_2, LANG_UNIVERSAL, 0);
-						cyrukh->setFaction(14);
+						cyrukh->SetFaction(14);
 						cyrukh->SetReactState(REACT_AGGRESSIVE);
 						cyrukh->GetMotionMaster()->MovePoint(0, -3663.570f, 1831.090f, 60.117f);
 						CyrukhYell = true;
@@ -4027,7 +4013,7 @@ void AddSC_shadowmoon_valley()
     newscript = new Script;
     newscript->Name = "npc_karynaku";
 	newscript->GetAI = &GetAI_npc_karynaku;
-    newscript->pQuestAccept = &QuestAccept_npc_karynaku;
+    newscript->QuestAccept = &QuestAccept_npc_karynaku;
     newscript->RegisterSelf();
 
     newscript = new Script;
@@ -4040,13 +4026,13 @@ void AddSC_shadowmoon_valley()
     newscript = new Script;
     newscript->Name = "npc_overlord_morghor";
     newscript->GetAI = &GetAI_npc_overlord_morghorAI;
-    newscript->pQuestAccept = &QuestAccept_npc_overlord_morghor;
+    newscript->QuestAccept = &QuestAccept_npc_overlord_morghor;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "npc_earthmender_wilda";
     newscript->GetAI = &GetAI_npc_earthmender_wildaAI;
-    newscript->pQuestAccept = &QuestAccept_npc_earthmender_wilda;
+    newscript->QuestAccept = &QuestAccept_npc_earthmender_wilda;
     newscript->RegisterSelf();
 
     newscript = new Script;
@@ -4112,12 +4098,12 @@ void AddSC_shadowmoon_valley()
 
 	newscript = new Script;
 	newscript->Name = "npc_plexi";
-	newscript->pQuestAccept = &QuestAccept_npc_plexi;
+	newscript->QuestAccept = &QuestAccept_npc_plexi;
 	newscript->RegisterSelf();
 
 	newscript = new Script;
 	newscript->Name = "npc_nakansi";
-	newscript->pQuestAccept = &QuestAccept_npc_nakansi;
+	newscript->QuestAccept = &QuestAccept_npc_nakansi;
 	newscript->RegisterSelf();
 
 	newscript = new Script;
@@ -4132,7 +4118,7 @@ void AddSC_shadowmoon_valley()
 
 	newscript = new Script;
 	newscript->Name = "npc_shadowmoon_ancient_spirit";
-	newscript->pQuestAccept = &QuestAccept_npc_shadowmoon_ancient_spirit;
+	newscript->QuestAccept = &QuestAccept_npc_shadowmoon_ancient_spirit;
 	newscript->RegisterSelf();
 
 	newscript = new Script;
@@ -4163,7 +4149,7 @@ void AddSC_shadowmoon_valley()
 
 	newscript = new Script;
 	newscript->Name = "npc_artor_spirit";
-	newscript->pQuestAccept = &QuestAccept_npc_artor_spirit;
+	newscript->QuestAccept = &QuestAccept_npc_artor_spirit;
 	newscript->RegisterSelf();
 
 	newscript = new Script;

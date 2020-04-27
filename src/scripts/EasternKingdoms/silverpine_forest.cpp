@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -46,7 +46,7 @@ struct npc_astor_hadrenAI : public ScriptedAI
 
     void Reset()
     {
-        me->setFaction(68);
+        me->SetFaction(68);
     }
 
     void EnterCombat(Unit* /*who*/)
@@ -55,7 +55,7 @@ struct npc_astor_hadrenAI : public ScriptedAI
 
     void JustDied(Unit* /*who*/)
     {
-        me->setFaction(68);
+        me->SetFaction(68);
     }
 };
 
@@ -84,7 +84,7 @@ bool GossipSelect_npc_astor_hadren(Player* pPlayer, Creature* pCreature, uint32 
         break;
     case GOSSIP_ACTION_INFO_DEF + 2:
         pPlayer->CLOSE_GOSSIP_MENU();
-        pCreature->setFaction(21);
+        pCreature->SetFaction(21);
         if (pPlayer)
             CAST_AI(npc_astor_hadrenAI, pCreature->AI())->AttackStart(pPlayer);
         break;
@@ -277,7 +277,7 @@ struct pyrewood_ambushAI : public ScriptedAI
 
             if (pTarget)
             {
-                pSummoned->setFaction(168);
+                pSummoned->SetFaction(168);
                 pSummoned->AddThreat(pTarget, 32.0f);
                 pSummoned->AI()->AttackStart(pTarget);
             }
@@ -390,12 +390,12 @@ void AddSC_silverpine_forest()
     newscript = new Script;
     newscript->Name = "npc_deathstalker_erland";
     newscript->GetAI = &GetAI_npc_deathstalker_erlandAI;
-    newscript->pQuestAccept = &QuestAccept_npc_deathstalker_erland;
+    newscript->QuestAccept = &QuestAccept_npc_deathstalker_erland;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "pyrewood_ambush";
     newscript->GetAI = &GetAI_pyrewood_ambush;
-    newscript->pQuestAccept = &QuestAccept_pyrewood_ambush;
+    newscript->QuestAccept = &QuestAccept_pyrewood_ambush;
     newscript->RegisterSelf();
 }

@@ -12,13 +12,13 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Common.h"
 #include "RealmList.h"
 #include "AuthCodes.h"
-#include "Util.h"                                           // for Tokens typedef
+#include "Utilities/Util.h"                                           // for Tokens typedef
 #include "Database/DatabaseEnv.h"
 
 extern DatabaseType LoginDatabase;

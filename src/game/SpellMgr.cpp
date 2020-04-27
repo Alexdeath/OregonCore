@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Unit.h"
@@ -350,8 +350,13 @@ uint32 CalculatePowerCost(SpellEntry const* spellInfo, Unit const* caster, Spell
     if (Player* modOwner = caster->GetSpellModOwner())
         modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_COST, powerCost);
 
-    if (spellInfo->Attributes & SPELL_ATTR0_LEVEL_DAMAGE_CALCULATION)
-        powerCost = int32(powerCost / (1.117f * spellInfo->spellLevel / caster->getLevel() - 0.1327f));
+    if (!caster->IsControlledByPlayer() && spellInfo->Attributes & SPELL_ATTR0_LEVEL_DAMAGE_CALCULATION)
+    {
+        GtNPCManaCostScalerEntry const* spellScaler = sGtNPCManaCostScalerStore.LookupEntry(spellInfo->spellLevel - 1);
+        GtNPCManaCostScalerEntry const* casterScaler = sGtNPCManaCostScalerStore.LookupEntry(caster->getLevel() - 1);
+        if (spellScaler && casterScaler)
+            powerCost *= casterScaler->ratio / spellScaler->ratio;
+    }
 
     // PCT mod from user auras by school
     powerCost = int32(powerCost * (1.0f + caster->GetFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER + school)));
@@ -966,18 +971,13 @@ void SpellMgr::LoadSpellAffects()
     QueryResult_AutoPtr result = WorldDatabase.Query("SELECT entry, effectId, SpellFamilyMask FROM spell_affect");
     if (!result)
     {
-
-
-
         sLog.outString(">> Loaded %u spell affect definitions", count);
         return;
     }
 
-
     do
     {
         Field* fields = result->Fetch();
-
 
         uint16 entry = fields[0].GetUInt16();
         uint8 effectId = fields[1].GetUInt8();
@@ -997,7 +997,8 @@ void SpellMgr::LoadSpellAffects()
         }
 
         if ((spellInfo->Effect[effectId]              != SPELL_EFFECT_APPLY_AURA) ||
-            (spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_FLAT_MODIFIER &&
+            (spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_DUMMY &&
+             spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_FLAT_MODIFIER &&
              spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_PCT_MODIFIER  &&
              spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_TARGET_TRIGGER))
         {
@@ -1618,12 +1619,19 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2, bool
             break;
     }
 
-    // generic spells
-    if (!spellInfo_1->SpellFamilyName)
+    if (spellInfo_1->SpellFamilyName == SPELLFAMILY_GENERIC)
     {
-        if (!spellInfo_1->SpellIconID
-            || spellInfo_1->SpellIconID == 1
-            || spellInfo_1->SpellIconID != spellInfo_2->SpellIconID)
+        if (spellInfo_1->HasAttribute(SPELL_ATTR0_PASSIVE) && spellInfo_1->SpellIconID == 1)
+            return false;
+
+        if (spellInfo_1->SpellIconID == spellInfo_2->SpellIconID)
+            return true;
+
+        if (spellInfo_1->EffectApplyAuraName[0] == SPELL_AURA_MOUNTED && spellInfo_2->EffectApplyAuraName[0] == SPELL_AURA_MOUNTED)
+            return true;
+
+        if (!(spellInfo_1->EffectApplyAuraName[0] == SPELL_AURA_MOD_POWER_REGEN &&
+            spellInfo_1->EffectApplyAuraName[1] == SPELL_AURA_PERIODIC_DUMMY))
             return false;
     }
 
@@ -2892,19 +2900,49 @@ bool SpellMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
     return true;
 }
 
-bool IsSpellAllowedInLocation(SpellEntry const* spellInfo, uint32 map_id, uint32 zone_id, uint32 area_id)
+SpellCastResult IsSpellAllowedInLocation(SpellEntry const* spellInfo, uint32 map_id, uint32 zone_id, uint32 area_id)
 {
     // normal case
     if (spellInfo->AreaId && spellInfo->AreaId != zone_id && spellInfo->AreaId != area_id)
-        return false;
+        return SPELL_FAILED_REQUIRES_AREA;
 
-    // elixirs (all area dependent elixirs have family SPELLFAMILY_POTION, use this for speedup)
-    if (spellInfo->SpellFamilyName == SPELLFAMILY_POTION)
-        return true;
+    // continent limitation (virtual continent)
+    if (spellInfo->HasAttribute(SPELL_ATTR4_CAST_ONLY_IN_OUTLAND))
+    {
+        uint32 v_map = GetVirtualMapForMapAndZone(map_id, zone_id);
+        MapEntry const* mapEntry = sMapStore.LookupEntry(v_map);
+        if (!mapEntry || mapEntry->addon < 1 || !mapEntry->IsContinent())
+            return SPELL_FAILED_REQUIRES_AREA;
+    }
+
+    // raid instance limitation
+    if (spellInfo->HasAttribute(SPELL_ATTR6_NOT_IN_RAID_INSTANCE))
+    {
+        MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
+        if (!mapEntry || mapEntry->IsRaid())
+            return SPELL_FAILED_TARGET_NOT_IN_RAID;
+    }
 
     // special cases zone check (maps checked by multimap common id)
     switch (spellInfo->Id)
     {
+    case 46838:                                         // Shattrath Flask of Pure Death
+    case 41607:                                         // Shattrath Flask of Fortification
+    case 41605:                                         // Shattrath Flask of Mighty Restoration
+    case 41604:                                         // Shattrath Flask of Supreme Power
+    case 41606:                                         // Shattrath Flask of Relentless Assault
+    case 46840:                                         // Shattrath Flask of Blinding Light
+    {
+        MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
+        if (!mapEntry)
+            return SPELL_FAILED_REQUIRES_AREA;
+
+                        // Tempest Keep        // Black Temple          // Serpentshrine Cavern     // Sunwell               // Mount Hyjal
+        if (mapEntry->multimap_id == 206 || mapEntry->MapID == 564 || mapEntry->MapID == 548 || mapEntry->MapID == 580 || mapEntry->MapID == 534)
+            return SPELL_CAST_OK;
+        else
+            return SPELL_FAILED_DONT_REPORT;
+    }
     case 23333:                                         // Warsong Flag
     case 23335:                                         // Silverwing Flag
     case 46392:                                         // Focused Assault
@@ -2912,29 +2950,29 @@ bool IsSpellAllowedInLocation(SpellEntry const* spellInfo, uint32 map_id, uint32
         {
             MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
             if (!mapEntry)
-                return false;
+                return SPELL_FAILED_REQUIRES_AREA;
 
             if (!mapEntry->IsBattleground())
-                return false;
+                return SPELL_FAILED_REQUIRES_AREA;
 
             if (zone_id == 3277)
-                return true;
+                return SPELL_CAST_OK;
 
-            return false;
+            return SPELL_FAILED_REQUIRES_AREA;
         }
     case 34976:                                         // Netherstorm Flag
         {
             MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
             if (!mapEntry)
-                return false;
+                return SPELL_FAILED_REQUIRES_AREA;
 
             if (!mapEntry->IsBattleground())
-                return false;
+                return SPELL_FAILED_REQUIRES_AREA;
 
             if (zone_id == 3820)
-                return true;
+                return SPELL_CAST_OK;
 
-            return false;
+            return SPELL_FAILED_REQUIRES_AREA;
         }
     case 32724:                                         // Gold Team (Alliance)
     case 32725:                                         // Green Team (Alliance)
@@ -2944,7 +2982,7 @@ bool IsSpellAllowedInLocation(SpellEntry const* spellInfo, uint32 map_id, uint32
         {
             MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
             if (!mapEntry)
-                return false;
+                return SPELL_FAILED_REQUIRES_AREA;
 
             //the follow code doesn't work.
             //if (!mapEntry->IsBattleArena())
@@ -2952,31 +2990,31 @@ bool IsSpellAllowedInLocation(SpellEntry const* spellInfo, uint32 map_id, uint32
 
             //this is the working code, HACK
             if (zone_id == 3702 || zone_id == 3968 || zone_id == 3698)
-                return true;
+                return SPELL_CAST_OK;
 
-            return false;
+            return SPELL_FAILED_REQUIRES_AREA;
         }
     case 41618:                                         // Bottled Nethergon Energy
     case 41620:                                         // Bottled Nethergon Vapor
         {
             MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
             if (!mapEntry)
-                return false;
+                return SPELL_FAILED_REQUIRES_AREA;
 
-            return mapEntry->multimap_id == 206;
+            return mapEntry->multimap_id == 206 ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         }
     case 41617:                                         // Cenarion Mana Salve
     case 41619:                                         // Cenarion Healing Salve
         {
             MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
             if (!mapEntry)
-                return false;
+                return SPELL_FAILED_REQUIRES_AREA;
 
-            return mapEntry->multimap_id == 207;
+            return mapEntry->multimap_id == 207 ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         }
     case 40216:                                         // Dragonmaw Illusion
     case 42016:                                         // Dragonmaw Illusion
-        return area_id == 3759 || area_id == 3966 || area_id == 3939;
+        return (area_id == 3759 || area_id == 3966 || area_id == 3939) ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
     case 2584:                                          // Waiting to Resurrect
     case 22011:                                         // Spirit Heal Channel
     case 22012:                                         // Spirit Heal
@@ -2988,14 +3026,14 @@ bool IsSpellAllowedInLocation(SpellEntry const* spellInfo, uint32 map_id, uint32
         {
             MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
             if (!mapEntry)
-                return false;
+                return SPELL_FAILED_REQUIRES_AREA;
 
             if (!mapEntry->IsBattleground())
-                return false;
+                return SPELL_FAILED_REQUIRES_AREA;
         }
     }
 
-    return true;
+    return SPELL_CAST_OK;
 }
 
 void SpellMgr::LoadSkillLineAbilityMap()

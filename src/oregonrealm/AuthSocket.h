@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef _AUTHSOCKET_H
@@ -24,6 +24,16 @@
 #include "ByteBuffer.h"
 
 #include "BufferedSocket.h"
+
+enum eStatus
+{
+    STATUS_CHALLENGE,
+    STATUS_LOGON_PROOF,
+    STATUS_RECON_PROOF,
+    STATUS_PATCH,
+    STATUS_AUTHED,
+    STATUS_CLOSED
+};
 
 // Handle login commands
 class AuthSocket: public BufferedSocket
@@ -59,7 +69,7 @@ class AuthSocket: public BufferedSocket
         BigNumber K;
         BigNumber _reconnectProof;
 
-        bool _authed;
+        eStatus _status;
 
         std::string _login;
         std::string _safelogin;

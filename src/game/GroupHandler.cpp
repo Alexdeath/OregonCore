@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Common.h"
@@ -28,7 +28,7 @@
 #include "ObjectAccessor.h"
 #include "MapManager.h"
 #include "SocialMgr.h"
-#include "Util.h"
+#include "Utilities/Util.h"
 
 /* differeces from off:
     -you can uninvite yourself - is is useful
@@ -75,6 +75,13 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
 
     // no player
     if (!player)
+    {
+        SendPartyResult(PARTY_OP_INVITE, membername, PARTY_RESULT_CANT_FIND_TARGET);
+        return;
+    }
+
+    // player trying to invite himself (most likely cheating)
+    if (player == GetPlayer())
     {
         SendPartyResult(PARTY_OP_INVITE, membername, PARTY_RESULT_CANT_FIND_TARGET);
         return;
@@ -162,6 +169,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
         }
         if (!group->AddInvite(player, false))
         {
+            group->RemoveAllInvites();
             delete group;
             return;
         }
@@ -582,14 +590,11 @@ void WorldSession::HandleGroupPromoteOpcode(WorldPacket& recv_data)
     if (!group)
         return;
 
-    uint8 flag1, flag2;
+    uint8 role;
+    uint8 apply;
     uint64 guid;
-    recv_data >> flag1 >> flag2;
+    recv_data >> role >> apply;                             // role 0 = Main Tank, 1 = Main Assistant
     recv_data >> guid;
-    // if (flag1) Main Assist
-    //     0x4
-    // if (flag2) Main Tank
-    //     0x2
 
     /** error handling **/
     if (!group->IsLeader(GetPlayer()->GetGUID()))
@@ -597,10 +602,15 @@ void WorldSession::HandleGroupPromoteOpcode(WorldPacket& recv_data)
     /********************/
 
     // everything's fine, do it
-    if (flag1 == 1)
-        group->SetMainAssistant(guid);
-    if (flag2 == 1)
-        group->SetMainTank(guid);
+    if (apply)
+    {
+        switch (role)
+        {
+            case 0: group->SetMainTank(guid); break;
+            case 1: group->SetMainAssistant(guid); break;
+            default: break;
+        }
+    }
 }
 
 void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& recv_data)
@@ -953,3 +963,47 @@ void WorldSession::HandleGroupPassOnLootOpcode(WorldPacket& recv_data)
     GetPlayer()->SetPassOnGroupLoot(passOnLoot);
 }
 
+void WorldSession::HandleGroupSwapSubGroupOpcode(WorldPacket& recv_data)
+{
+    std::string playerName1, playerName2;
+
+    recv_data >> playerName1;
+    recv_data >> playerName2;
+
+    Player* player = GetPlayer();
+
+    Group* group = player->GetGroup();
+    if (!group || !group->isRaidGroup())
+        return;
+
+    ObjectGuid const& guid = player->GetObjectGUID();
+    if (!group->IsLeader(guid) && !group->IsAssistant(guid))
+        return;
+
+    auto getMemberSlotInfo = [&group](std::string const& playerName, uint8& subgroup, ObjectGuid& guid)
+    {
+        auto slots = group->GetMemberSlots();
+        for (auto i = slots.begin(); i != slots.end(); ++i)
+        {
+            if ((*i).guid && (*i).name == playerName)
+            {
+                subgroup = (*i).group;
+                guid = (*i).guid;
+                return true;
+            }
+        }
+        return false;
+    };
+
+    ObjectGuid guid1, guid2;
+    uint8 subgroup1, subgroup2;
+
+    if (!getMemberSlotInfo(playerName1, subgroup1, guid1) || !getMemberSlotInfo(playerName2, subgroup2, guid2))
+        return;
+
+    if (subgroup1 == subgroup2)
+        return;
+
+    group->ChangeMembersGroup(guid1, subgroup2);
+    group->ChangeMembersGroup(guid2, subgroup1);
+}

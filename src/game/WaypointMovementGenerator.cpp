@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "WaypointMovementGenerator.h"
@@ -72,7 +72,7 @@ WaypointMovementGenerator<Creature>::MoveToNextNode(Creature& unit, const Waypoi
     else
         init.SetWalk(false);
 
-    if (unit.canFly())
+    if (unit.CanFly())
         init.SetFly();
 
     int32 traveltime = init.Launch();
@@ -242,6 +242,7 @@ void FlightPathMovementGenerator::Finalize(Player& player)
 
     player.Dismount();
     player.RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_REMOVE_CLIENT_CONTROL | UNIT_FLAG_TAXI_FLIGHT);
+    player.SetClientControl(&player, 1);
 
     if (player.m_taxi.empty())
     {
@@ -263,6 +264,7 @@ void FlightPathMovementGenerator::Reset(Player& player)
     player.getHostileRefManager().setOnlineOfflineState(false);
     player.AddUnitState(UNIT_STATE_IN_FLIGHT);
     player.SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_REMOVE_CLIENT_CONTROL | UNIT_FLAG_TAXI_FLIGHT);
+    player.SetClientControl(&player, 0);
 
     Movement::MoveSplineInit init(player);
     uint32 end = GetPathAtMapEnd();
@@ -296,7 +298,19 @@ bool FlightPathMovementGenerator::Update(Player& player, const uint32& diff)
         while (true);
     }
 
-    return i_currentNode < (i_path->size()-1);
+    const bool flying = (i_currentNode < (i_path->size() - 1));
+
+    // Multi-map flight paths
+    if (flying && (*i_path)[i_currentNode + 1].mapid != player.GetMapId())
+    {
+        // short preparations to continue flight
+        SetCurrentNodeAfterTeleport();
+        TaxiPathNodeEntry const& node = (*i_path)[i_currentNode];
+        SkipCurrentNode();
+        player.TeleportTo(node.mapid, node.x, node.y, node.z, player.GetOrientation());
+    }
+
+    return flying;
 }
 
 void FlightPathMovementGenerator::SetCurrentNodeAfterTeleport()

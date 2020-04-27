@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef DEF_DEADMINES_H
@@ -24,6 +24,7 @@ enum CannonState
     CANNON_GUNPOWDER_USED,
     CANNON_BLAST_INITIATED,
     PIRATES_ATTACK,
+    SMITE_ALARMED,
     EVENT_DONE
 };
 
@@ -44,5 +45,14 @@ enum GameObjects
     GO_DEFIAS_CANNON                                       = 16398,
     GO_DOOR_LEVER                                          = 101833,
     GO_MR_SMITE_CHEST                                      = 144111
+};
+
+enum CreaturesIds
+{
+    NPC_RHAHK_ZOR  = 644, 
+    NPC_MR_SMITE   = 646,
+    NPC_OVERSEER   = 634,
+    NPC_EVOKER     = 1729,
+    NPC_TASKMASTER = 4417
 };
 #endif

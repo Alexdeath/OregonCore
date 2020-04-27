@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -40,7 +40,7 @@ bool GossipHello_npcs_riverbreeze_and_silversky(Player* pPlayer, Creature* pCrea
 {
     uint32 eCreature = pCreature->GetEntry();
 
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
     if (eCreature == 9528)

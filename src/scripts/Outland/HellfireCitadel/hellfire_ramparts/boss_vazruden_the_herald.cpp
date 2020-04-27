@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -101,7 +101,7 @@ struct boss_nazanAI : public ScriptedAI
         if (summoned && summoned->GetEntry() == ENTRY_LIQUID_FIRE)
         {
             summoned->SetLevel(me->getLevel());
-            summoned->setFaction(me->getFaction());
+            summoned->SetFaction(me->GetFaction());
             summoned->CastSpell(summoned, SPELL_BLAZE, true);
             summoned->CastSpell(summoned, SPELL_FIRE_NOVA_VISUAL, true);
         }

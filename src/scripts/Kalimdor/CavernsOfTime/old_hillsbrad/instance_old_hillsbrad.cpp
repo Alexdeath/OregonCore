@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2010-2014 OregonCore <http://www.oregoncore.com/>
- * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2010-2019 OregonCore <https://oregon-core.net/>
+ * Copyright (C) 2008-2012 TrinityCore <https://www.trinitycore.org/>
  * Copyright (C) 2006-2012 ScriptDev2 <http://www.scriptdev2.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -14,7 +14,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -219,7 +219,7 @@ struct instance_old_hillsbrad : public ScriptedInstance
 
                         Encounter[0] = DONE;
                         Position OrcLocPos;
-                        
+
                         // move the orcs outside the houses
                         float x, y, z;
                         for (std::list<uint64>::iterator it = RightPrisonersList.begin(); it != RightPrisonersList.end(); ++it)

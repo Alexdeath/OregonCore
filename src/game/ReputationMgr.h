@@ -12,7 +12,7 @@
 * more details.
 *
 * You should have received a copy of the GNU General Public License along
-* with this program. If not, see <http://www.gnu.org/licenses/>.
+* with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 #ifndef __OREGON_REPUTATION_MGR_H
@@ -21,6 +21,7 @@
 #include "Common.h"
 #include "SharedDefines.h"
 #include "DBCStructure.h"
+#include "QueryResult.h"
 #include <map>
 
 enum FactionFlags

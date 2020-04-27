@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "BoundingIntervalHierarchy.h"
@@ -145,13 +145,13 @@ void BIH::subdivide(int left, int right, std::vector<uint32> &tempTree, buildDat
         else if (left > right)
         {
             // all right
+            right = rightOrig;
             if (prevAxis == axis && G3D::fuzzyEq(prevSplit, split)) {
                 // we are stuck here - create a leaf
                 stats.updateLeaf(depth, right - left + 1);
                 createNode(tempTree, nodeIndex, left, right);
                 return;
             }
-            right = rightOrig;
             if (clipR >= split) {
                 // keep looping on right half
                 gridBox.lo[axis] = split;

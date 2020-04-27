@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "SQLStorage.h"
@@ -20,11 +20,11 @@
 
 extern Database WorldDatabase;
 
-const char CreatureInfosrcfmt[] = "iiiiiiiisssiiiiiiiiiiifffiffiiiiiiiiiiiiffiiiiiiiiiiiiiiiiiiisiifflliiis";
-const char CreatureInfodstfmt[] = "iiiiiiiisssiiiiiiiiiiifffiffiiiiiiiiiiiiffiiiiiiiiiiiiiiiiiiisiifflliiii";
-const char CreatureDataAddonInfofmt[] = "iiiiiiiis";
-const char CreatureModelfmt[] = "iffbi";
-const char CreatureInfoAddonInfofmt[] = "iiiiiiiis";
+const char CreatureInfosrcfmt[] = "iiiiiiiisssiiiiiiiiiiifffiiiffiiiiiiiiiiiiiiiiiiiiiiiiiiisiifffflliiis";
+const char CreatureInfodstfmt[] = "iiiiiiiisssiiiiiiiiiiifffiiiffiiiiiiiiiiiiiiiiiiiiiiiiiiisiifffflliiii";
+const char CreatureDataAddonInfofmt[] = "iiiiiiis";
+const char CreatureModelfmt[] = "iffffbi";
+const char CreatureInfoAddonInfofmt[] = "iiiiiiis";
 const char EquipmentInfofmt[] = "iiii";
 const char EquipmentInfoRawfmt[] = "iiiiiiiiii";
 const char GameObjectInfosrcfmt[] = "iiissiifiiiiiiiiiiiiiiiiiiiiiiiiss";
@@ -37,7 +37,7 @@ const char InstanceTemplatedstfmt[] = "iiiiiffffib";
 
 SQLStorage sCreatureStorage(CreatureInfosrcfmt, CreatureInfodstfmt, "entry", "creature_template");
 SQLStorage sCreatureDataAddonStorage(CreatureDataAddonInfofmt, "guid", "creature_addon");
-SQLStorage sCreatureModelStorage(CreatureModelfmt, "modelid", "creature_model_info");
+SQLStorage sCreatureModelStorage(CreatureModelfmt, "DisplayID", "creature_model_info");
 SQLStorage sCreatureInfoAddonStorage(CreatureInfoAddonInfofmt, "entry", "creature_template_addon");
 SQLStorage sEquipmentStorage(EquipmentInfofmt, "entry", "creature_equip_template");
 SQLStorage sEquipmentStorageRaw(EquipmentInfoRawfmt, "entry", "creature_equip_template_raw");

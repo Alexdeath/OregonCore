@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef OREGON_MAP_H
@@ -139,7 +139,7 @@ enum ZLiquidStatus
 #define MAP_LIQUID_TYPE_SLIME       0x04
 #define MAP_LIQUID_TYPE_WATER       0x08
 
-#define MAP_ALL_LIQUIDS   (MAP_LIQUID_TYPE_WATER | MAP_LIQUID_TYPE_OCEAN | MAP_LIQUID_TYPE_MAGMA | MAP_LIQUID_TYPE_SLIME)
+#define MAP_ALL_LIQUIDS   (MAP_LIQUID_TYPE_WATER | MAP_LIQUID_TYPE_MAGMA | MAP_LIQUID_TYPE_OCEAN | MAP_LIQUID_TYPE_SLIME)
 
 #define MAP_LIQUID_TYPE_DARK_WATER  0x10
 #define MAP_LIQUID_TYPE_WMO_WATER   0x20
@@ -363,6 +363,7 @@ class Map : public GridRefManager<NGridType>, public Oregon::ObjectLevelLockable
         float GetWaterLevel(float x, float y) const;
         bool IsInWater(float x, float y, float z, LiquidData* data = nullptr) const;
         bool IsUnderWater(float x, float y, float z) const;
+        bool IsSwimmable(float x, float y, float z, LiquidData* data = nullptr) const;
 
         static uint32 GetAreaId(uint16 areaflag, uint32 map_id);
         static uint32 GetZoneId(uint16 areaflag, uint32 map_id);
@@ -587,7 +588,6 @@ class Map : public GridRefManager<NGridType>, public Oregon::ObjectLevelLockable
         void setNGrid(NGridType* grid, uint32 x, uint32 y);
         void ScriptsProcess();
 
-        void UpdateActiveCells(const float& x, const float& y, const uint32& t_diff);
     protected:
         void SetUnloadReferenceLock(const GridCoord& p, bool on)
         {

@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -287,7 +287,7 @@ bool QuestAccept_npc_prospector_remtravel(Player* pPlayer, Creature* pCreature, 
         if (npc_escortAI* pEscortAI = CAST_AI(npc_prospector_remtravelAI, pCreature->AI()))
             pEscortAI->Start(false, false, pPlayer->GetGUID());
 
-        pCreature->setFaction(FACTION_ESCORTEE);
+        pCreature->SetFaction(FACTION_ESCORTEE);
     }
 
     return true;
@@ -324,7 +324,7 @@ struct npc_threshwackonatorAI : public FollowerAI
             {
                 DoScriptText(SAY_AT_CLOSE, pWho);
 
-                me->setFaction(FACTION_HOSTILE);
+                me->SetFaction(FACTION_HOSTILE);
                 if (Player* pHolder = GetLeaderForFollower())
                     me->AI()->AttackStart(pHolder);
             }
@@ -504,13 +504,13 @@ void AddSC_darkshore()
     newscript = new Script;
     newscript->Name = "npc_kerlonian";
     newscript->GetAI = &GetAI_npc_kerlonian;
-    newscript->pQuestAccept = &QuestAccept_npc_kerlonian;
+    newscript->QuestAccept = &QuestAccept_npc_kerlonian;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "npc_prospector_remtravel";
     newscript->GetAI = &GetAI_npc_prospector_remtravel;
-    newscript->pQuestAccept = &QuestAccept_npc_prospector_remtravel;
+    newscript->QuestAccept = &QuestAccept_npc_prospector_remtravel;
     newscript->RegisterSelf();
 
     newscript = new Script;

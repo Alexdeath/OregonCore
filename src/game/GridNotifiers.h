@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef OREGON_GRIDNOTIFIERS_H
@@ -139,10 +139,11 @@ struct MessageDistDeliverer
 {
     WorldObject* i_source;
     WorldPacket* i_message;
+    uint32 i_phaseMask;
     float i_distSq;
     uint32 team;
     MessageDistDeliverer(WorldObject* src, WorldPacket* msg, float dist, bool own_team_only = false)
-        : i_source(src), i_message(msg), i_distSq(dist* dist)
+        : i_source(src), i_message(msg), i_phaseMask(src->GetPhaseMask()), i_distSq(dist* dist)
         , team((own_team_only && src->GetTypeId() == TYPEID_PLAYER) ? ((Player*)src)->GetTeam() : 0)
     {
     }
@@ -201,10 +202,11 @@ struct DynamicObjectUpdater
 template<class Check>
 struct WorldObjectSearcher
 {
+    uint32 i_phaseMask;
     WorldObject*& i_object;
     Check& i_check;
 
-    WorldObjectSearcher(WorldObject*& result, Check& check) : i_object(result), i_check(check) {}
+    WorldObjectSearcher(WorldObject const* searcher, WorldObject*& result, Check& check) : i_phaseMask(searcher->GetPhaseMask()), i_object(result), i_check(check) {}
 
     void Visit(GameObjectMapType& m);
     void Visit(PlayerMapType& m);
@@ -218,10 +220,11 @@ struct WorldObjectSearcher
 template<class Check>
 struct WorldObjectListSearcher
 {
+    uint32 i_phaseMask;
     std::list<WorldObject*>& i_objects;
     Check& i_check;
 
-    WorldObjectListSearcher(std::list<WorldObject*>& objects, Check& check) : i_objects(objects), i_check(check) {}
+    WorldObjectListSearcher(WorldObject const* searcher, std::list<WorldObject*>& objects, Check& check) : i_phaseMask(searcher->GetPhaseMask()), i_objects(objects), i_check(check) {}
 
     void Visit(PlayerMapType& m);
     void Visit(CreatureMapType& m);
@@ -235,37 +238,43 @@ struct WorldObjectListSearcher
 template<class Do>
 struct WorldObjectWorker
 {
+    uint32 i_phaseMask;
     Do const& i_do;
 
-    explicit WorldObjectWorker(Do const& _do) : i_do(_do) {}
+    explicit WorldObjectWorker(WorldObject const* searcher, Do const& _do) : i_phaseMask(searcher->GetPhaseMask()), i_do(_do) {}
 
     void Visit(GameObjectMapType& m)
     {
         for (GameObjectMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
-            i_do(itr->GetSource());
+            if (itr->GetSource()->InSamePhase(i_phaseMask))
+                i_do(itr->GetSource());
     }
 
     void Visit(PlayerMapType& m)
     {
         for (PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
-            i_do(itr->GetSource());
+            if (itr->GetSource()->InSamePhase(i_phaseMask))
+                i_do(itr->GetSource());
     }
     void Visit(CreatureMapType& m)
     {
         for (CreatureMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
-            i_do(itr->GetSource());
+            if (itr->GetSource()->InSamePhase(i_phaseMask))
+                i_do(itr->GetSource());
     }
 
     void Visit(CorpseMapType& m)
     {
         for (CorpseMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
-            i_do(itr->GetSource());
+            if (itr->GetSource()->InSamePhase(i_phaseMask))
+                i_do(itr->GetSource());
     }
 
     void Visit(DynamicObjectMapType& m)
     {
         for (DynamicObjectMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
-            i_do(itr->GetSource());
+            if (itr->GetSource()->InSamePhase(i_phaseMask))
+                i_do(itr->GetSource());
     }
 
     template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
@@ -276,10 +285,11 @@ struct WorldObjectWorker
 template<class Check>
 struct GameObjectSearcher
 {
+    uint32 i_phaseMask;
     GameObject*& i_object;
     Check& i_check;
 
-    GameObjectSearcher(GameObject*& result, Check& check) : i_object(result), i_check(check) {}
+    GameObjectSearcher(WorldObject const* searcher, GameObject*& result, Check& check) : i_phaseMask(searcher->GetPhaseMask()), i_object(result), i_check(check) {}
 
     void Visit(GameObjectMapType& m);
 
@@ -290,10 +300,11 @@ struct GameObjectSearcher
 template<class Check>
 struct GameObjectLastSearcher
 {
+    uint32 i_phaseMask;
     GameObject*& i_object;
     Check& i_check;
 
-    GameObjectLastSearcher(GameObject*& result, Check& check) : i_object(result), i_check(check) {}
+    GameObjectLastSearcher(WorldObject const* searcher, GameObject*& result, Check& check) : i_phaseMask(searcher->GetPhaseMask()), i_object(result), i_check(check) {}
 
     void Visit(GameObjectMapType& m);
 
@@ -303,10 +314,11 @@ struct GameObjectLastSearcher
 template<class Check>
 struct GameObjectListSearcher
 {
+    uint32 i_phaseMask;
     std::list<GameObject*>& i_objects;
     Check& i_check;
 
-    GameObjectListSearcher(std::list<GameObject*>& objects, Check& check) : i_objects(objects), i_check(check) {}
+    GameObjectListSearcher(WorldObject const* searcher, std::list<GameObject*>& objects, Check& check) : i_phaseMask(searcher->GetPhaseMask()), i_objects(objects), i_check(check) {}
 
     void Visit(GameObjectMapType& m);
 
@@ -319,10 +331,11 @@ struct GameObjectListSearcher
 template<class Check>
 struct UnitSearcher
 {
+    uint32 i_phaseMask;
     Unit*& i_object;
     Check& i_check;
 
-    UnitSearcher(Unit*& result, Check& check) : i_object(result), i_check(check) {}
+    UnitSearcher(WorldObject const* searcher, Unit*& result, Check& check) : i_phaseMask(searcher->GetPhaseMask()), i_object(result), i_check(check) {}
 
     void Visit(CreatureMapType& m);
     void Visit(PlayerMapType& m);
@@ -334,10 +347,11 @@ struct UnitSearcher
 template<class Check>
 struct UnitLastSearcher
 {
+    uint32 i_phaseMask;
     Unit*& i_object;
     Check& i_check;
 
-    UnitLastSearcher(Unit*& result, Check& check) : i_object(result), i_check(check) {}
+    UnitLastSearcher(WorldObject const* searcher, Unit*& result, Check& check) : i_phaseMask(searcher->GetPhaseMask()), i_object(result), i_check(check) {}
 
     void Visit(CreatureMapType& m);
     void Visit(PlayerMapType& m);
@@ -349,10 +363,11 @@ struct UnitLastSearcher
 template<class Check>
 struct UnitListSearcher
 {
+    uint32 i_phaseMask;
     std::list<Unit*>& i_objects;
     Check& i_check;
 
-    UnitListSearcher(std::list<Unit*>& objects, Check& check) : i_objects(objects), i_check(check) {}
+    UnitListSearcher(WorldObject const* searcher, std::list<Unit*>& objects, Check& check) : i_phaseMask(searcher->GetPhaseMask()), i_objects(objects), i_check(check) {}
 
     void Visit(PlayerMapType& m);
     void Visit(CreatureMapType& m);
@@ -365,10 +380,11 @@ struct UnitListSearcher
 template<class Check>
 struct CreatureSearcher
 {
+    uint32 i_phaseMask;
     Creature*& i_object;
     Check& i_check;
 
-    CreatureSearcher(Creature*& result, Check& check) : i_object(result), i_check(check) {}
+    CreatureSearcher(WorldObject const* searcher, Creature*& result, Check& check) : i_phaseMask(searcher->GetPhaseMask()), i_object(result), i_check(check) {}
 
     void Visit(CreatureMapType& m);
 
@@ -379,10 +395,11 @@ struct CreatureSearcher
 template<class Check>
 struct CreatureLastSearcher
 {
+    uint32 i_phaseMask;
     Creature*& i_object;
     Check& i_check;
 
-    CreatureLastSearcher(Creature*& result, Check& check) : i_object(result), i_check(check) {}
+    CreatureLastSearcher(WorldObject const* searcher, Creature*& result, Check& check) : i_phaseMask(searcher->GetPhaseMask()), i_object(result), i_check(check) {}
 
     void Visit(CreatureMapType& m);
 
@@ -392,10 +409,11 @@ struct CreatureLastSearcher
 template<class Check>
 struct CreatureListSearcher
 {
+    uint32 i_phaseMask;
     std::list<Creature*>& i_objects;
     Check& i_check;
 
-    CreatureListSearcher(std::list<Creature*>& objects, Check& check) : i_objects(objects), i_check(check) {}
+    CreatureListSearcher(WorldObject const* searcher, std::list<Creature*>& objects, Check& check) : i_phaseMask(searcher->GetPhaseMask()), i_objects(objects), i_check(check) {}
 
     void Visit(CreatureMapType& m);
 
@@ -405,10 +423,11 @@ struct CreatureListSearcher
 template<class Do>
 struct CreatureWorker
 {
+    uint32 i_phaseMask;
     Do& i_do;
 
-    CreatureWorker(Do& _do)
-        : i_do(_do) {}
+    CreatureWorker(WorldObject const* searcher, Do& _do)
+        : i_phaseMask(searcher->GetPhaseMask()), i_do(_do) {}
 
     void Visit(CreatureMapType& m)
     {
@@ -424,10 +443,11 @@ struct CreatureWorker
 template<class Check>
 struct PlayerSearcher
 {
+    uint32 i_phaseMask;
     Player*& i_object;
     Check& i_check;
 
-    PlayerSearcher(Player*& result, Check& check) : i_object(result), i_check(check) {}
+    PlayerSearcher(WorldObject const* searcher, Player*& result, Check& check) : i_phaseMask(searcher->GetPhaseMask()), i_object(result), i_check(check) {}
 
     void Visit(PlayerMapType& m);
 
@@ -437,11 +457,12 @@ struct PlayerSearcher
 template<class Check>
 struct PlayerListSearcher
 {
+    uint32 i_phaseMask;
     std::list<Player*>& i_objects;
     Check& i_check;
 
-    PlayerListSearcher(std::list<Player*>& objects, Check& check)
-        : i_objects(objects), i_check(check) {}
+    PlayerListSearcher(WorldObject const* searcher, std::list<Player*>& objects, Check& check)
+        : i_phaseMask(searcher->GetPhaseMask()), i_objects(objects), i_check(check) {}
 
     void Visit(PlayerMapType& m);
 
@@ -451,9 +472,10 @@ struct PlayerListSearcher
 template<class Do>
 struct PlayerWorker
 {
+    uint32 i_phaseMask;
     Do& i_do;
 
-    explicit PlayerWorker(Do& _do) : i_do(_do) {}
+    explicit PlayerWorker(WorldObject const* searcher, Do& _do) : i_phaseMask(searcher->GetPhaseMask()), i_do(_do) {}
 
     void Visit(PlayerMapType& m)
     {
@@ -467,16 +489,18 @@ struct PlayerWorker
 template<class Do>
 struct PlayerDistWorker
 {
+    WorldObject const* i_searcher;
     float i_dist;
     Do& i_do;
 
-    PlayerDistWorker(float _dist, Do& _do)
-        : i_dist(_dist), i_do(_do) {}
+    PlayerDistWorker(WorldObject const* searcher, float _dist, Do& _do)
+        : i_searcher(searcher), i_dist(_dist), i_do(_do) {}
 
     void Visit(PlayerMapType& m)
     {
         for (PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
-            i_do(itr->GetSource());
+            if (itr->GetSource()->InSamePhase(i_searcher) && itr->GetSource()->IsWithinDist(i_searcher, i_dist))
+                i_do(itr->GetSource());
     }
 
     template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED>&) {}
@@ -491,7 +515,7 @@ class CannibalizeObjectCheck
         CannibalizeObjectCheck(Unit* funit, float range) : i_funit(funit), i_range(range) {}
         bool operator()(Player* u)
         {
-            if (i_funit->IsFriendlyTo(u) || u->IsAlive() || u->isInFlight())
+            if (i_funit->IsFriendlyTo(u) || u->IsAlive() || u->IsInFlight())
                 return false;
 
             return i_funit->IsWithinDistInMap(u, i_range);
@@ -499,7 +523,7 @@ class CannibalizeObjectCheck
         bool operator()(Corpse* u);
         bool operator()(Creature* u)
         {
-            if (i_funit->IsFriendlyTo(u) || u->IsAlive() || u->isInFlight() ||
+            if (i_funit->IsFriendlyTo(u) || u->IsAlive() || u->IsInFlight() ||
                 (u->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD) == 0)
                 return false;
 
@@ -675,7 +699,7 @@ class FriendlyCCedInRange
         bool operator()(Unit* u)
         {
             if (u->IsAlive() && u->IsInCombat() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) &&
-                (u->isFeared() || u->isCharmed() || u->isFrozen() || u->HasUnitState(UNIT_STATE_STUNNED) || u->HasUnitState(UNIT_STATE_CONFUSED)))
+                (u->IsFeared() || u->isCharmed() || u->isFrozen() || u->HasUnitState(UNIT_STATE_STUNNED) || u->HasUnitState(UNIT_STATE_CONFUSED)))
                 return true;
             return false;
         }
@@ -762,7 +786,7 @@ class AnyFriendlyUnitInObjectRangeCheck
         AnyFriendlyUnitInObjectRangeCheck(WorldObject const* obj, Unit const* funit, float range, bool playerOnly = false) : i_obj(obj), i_funit(funit), i_range(range), i_playerOnly(playerOnly) {}
         bool operator()(Unit* u)
         {
-            if (u->IsAlive() && i_obj->IsWithinDistInMap(u, i_range) && i_funit->IsFriendlyTo(u) && (!i_playerOnly || u->GetTypeId() == TYPEID_PLAYER))
+            if (u->IsAlive() && i_obj->IsWithinDistInMap(u, i_range) && !u->InSamePhase(i_obj) && i_funit->IsFriendlyTo(u) && (!i_playerOnly || u->GetTypeId() == TYPEID_PLAYER))
                 return true;
             else
                 return false;
@@ -798,7 +822,7 @@ class NearestAttackableUnitInObjectRangeCheck
         bool operator()(Unit* u)
         {
             if (u->isTargetableForAttack() && i_obj->IsWithinDistInMap(u, i_range) &&
-                !i_funit->IsFriendlyTo(u) && u->CanSeeOrDetect(i_funit))
+                (i_funit->IsInCombatWith(u) || i_funit->IsHostileTo(u)) && i_obj->CanSeeOrDetect(u))
             {
                 i_range = i_obj->GetDistance(u);        // use found unit range as new range limit for next check
                 return true;
@@ -830,15 +854,13 @@ class AnyAoETargetUnitInObjectRangeCheck
         bool operator()(Unit* u)
         {
             // Check contains checks for: live, non-selectable, non-attackable flags, flight check and GM check, ignore totems
-            if (!u->isTargetableForAttack())
-                return false;
             if (u->GetTypeId() == TYPEID_UNIT && u->IsTotem())
                 return false;
 
-            if ((i_targetForPlayer ? !i_funit->IsFriendlyTo(u) : i_funit->IsHostileTo(u)) && i_obj->IsWithinDistInMap(u, i_range))
-                return true;
+            if (!i_funit->IsValidAttackTarget(u))
+                return false;
 
-            return false;
+            return u->IsInMap(i_obj) && u->InSamePhase(i_obj) && i_obj->IsWithinDistInMap(u, i_range);
         }
     private:
         bool i_targetForPlayer;
@@ -901,7 +923,7 @@ struct AnyDeadUnitCheck
                 if (!me->IsWithinDistInMap(u, m_range))
                     return false;
 
-                if (!me->canAttack(u))
+                if (!me->IsValidAttackTarget(u))
                     return false;
 
                 if (i_playerOnly && u->GetTypeId() != TYPEID_PLAYER)
@@ -921,10 +943,10 @@ struct AnyDeadUnitCheck
 class NearestHostileUnitInAttackDistanceCheck
 {
     public:
-        explicit NearestHostileUnitInAttackDistanceCheck(Creature const* creature, float dist = 0) : me(creature)
+        explicit NearestHostileUnitInAttackDistanceCheck(Creature const* creature, float dist = 0.f) : me(creature)
         {
-            m_range = (dist == 0 ? 9999 : dist);
-            m_force = (dist == 0 ? false : true);
+            m_range = (dist == 0.f ? 9999.f : dist);
+            m_force = (dist == 0.f ? false : true);
         }
         bool operator()(Unit* u)
         {
@@ -936,14 +958,11 @@ class NearestHostileUnitInAttackDistanceCheck
 
             if (m_force)
             {
-                if (!me->canAttack(u))
+                if (!me->IsValidAttackTarget(u))
                     return false;
             }
-            else
-            {
-                if (!me->canStartAttack(u))
-                    return false;
-            }
+            else if (!me->canStartAttack(u, false))
+                return false;
 
             m_range = me->GetDistance(u);   // use found unit range as new range limit for next check
             return true;
@@ -957,6 +976,35 @@ class NearestHostileUnitInAttackDistanceCheck
         float m_range;
         bool m_force;
         NearestHostileUnitInAttackDistanceCheck(NearestHostileUnitInAttackDistanceCheck const&);
+};
+
+class NearestHostileUnitInAggroRangeCheck
+{
+public:
+    explicit NearestHostileUnitInAggroRangeCheck(Creature const* creature, bool useLOS = false) : _me(creature), _useLOS(useLOS)
+    {
+    }
+    bool operator()(Unit* u)
+    {
+        if (!u->IsHostileTo(_me))
+            return false;
+
+        if (!u->IsWithinDistInMap(_me, _me->GetAggroRange(u)))
+            return false;
+
+        if (!_me->IsValidAttackTarget(u))
+            return false;
+
+        if (_useLOS && !u->IsWithinLOSInMap(_me))
+            return false;
+
+        return true;
+    }
+
+private:
+    Creature const* _me;
+    bool _useLOS;
+    NearestHostileUnitInAggroRangeCheck(NearestHostileUnitInAggroRangeCheck const&);
 };
 
 class AnyAssistCreatureInRangeCheck
@@ -998,7 +1046,7 @@ class NearestAssistCreatureInCreatureRangeCheck
 
         bool operator()(Creature* u)
         {
-            if (u->getFaction() == i_obj->getFaction() && !u->IsInCombat() && !u->GetCharmerOrOwnerGUID() && u->IsHostileTo(i_enemy) && u->IsAlive() && i_obj->IsWithinDistInMap(u, i_range) && i_obj->IsWithinLOSInMap(u))
+            if (u->GetFaction() == i_obj->GetFaction() && !u->IsInCombat() && !u->GetCharmerOrOwnerGUID() && u->IsHostileTo(i_enemy) && u->IsAlive() && i_obj->IsWithinDistInMap(u, i_range) && i_obj->IsWithinLOSInMap(u))
             {
                 i_range = i_obj->GetDistance(u);         // use found unit range as new range limit for next check
                 return true;
@@ -1098,7 +1146,7 @@ public:
     AllWorldObjectsInRange(const WorldObject* pObject, float fMaxRange) : m_pObject(pObject), m_fRange(fMaxRange) {}
     bool operator() (WorldObject* pGo)
     {
-        return m_pObject->IsWithinDistInMap(pGo, m_fRange, false);
+        return m_pObject->IsWithinDistInMap(pGo, m_fRange, false) && m_pObject->InSamePhase(pGo);
     }
 private:
     const WorldObject* m_pObject;

@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef DEF_SCARLET_M
@@ -22,9 +22,10 @@
 #define DATA_MOGRAINE                   2
 #define DATA_WHITEMANE                  3
 #define DATA_DOOR_WHITEMANE             4
-
+#define DATA_CHAPEL_DOOR                8
 #define DATA_HORSEMAN_EVENT             5
 #define GAMEOBJECT_PUMPKIN_SHRINE       6
+
 
 #define DATA_VORREL                     7
 #endif

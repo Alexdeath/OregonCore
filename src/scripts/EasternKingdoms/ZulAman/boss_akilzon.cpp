@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -213,7 +213,7 @@ struct boss_akilzonAI : public ScriptedAI
 
             {
                 Oregon::AnyAoETargetUnitInObjectRangeCheck u_check(me, me, SIZE_OF_GRIDS);
-                Oregon::UnitListSearcher<Oregon::AnyAoETargetUnitInObjectRangeCheck> searcher(tempUnitMap, u_check);
+                Oregon::UnitListSearcher<Oregon::AnyAoETargetUnitInObjectRangeCheck> searcher(me, tempUnitMap, u_check);
 
                 TypeContainerVisitor<Oregon::UnitListSearcher<Oregon::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
                 TypeContainerVisitor<Oregon::UnitListSearcher<Oregon::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
@@ -237,7 +237,7 @@ struct boss_akilzonAI : public ScriptedAI
                 y = 1380 + rand() % 60;
                 if (Unit* trigger = me->SummonTrigger(x, y, z, 0, 2000))
                 {
-                    trigger->setFaction(35);
+                    trigger->SetFaction(35);
                     trigger->SetMaxHealth(100000);
                     trigger->SetHealth(100000);
                     trigger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -358,7 +358,7 @@ struct boss_akilzonAI : public ScriptedAI
                 Cloud->SetLevitate(true);
                 Cloud->StopMoving();
                 Cloud->SetObjectScale(1.0f);
-                Cloud->setFaction(35);
+                Cloud->SetFaction(35);
                 Cloud->SetMaxHealth(9999999);
                 Cloud->SetHealth(9999999);
                 Cloud->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);

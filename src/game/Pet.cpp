@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Common.h"
@@ -27,7 +27,7 @@
 #include "Formulas.h"
 #include "SpellAuras.h"
 #include "Unit.h"
-#include "Util.h"
+#include "Utilities/Util.h"
 
 
 //numbers represent minutes * 100 while happy (you get 100 loyalty points per min while happy)
@@ -107,12 +107,13 @@ void Pet::AddToWorld()
 
     // Prevent stuck pets when zoning. Pets default to "follow" when added to world
     // so we'll reset flags and let the AI handle things
-    if (this->GetCharmInfo() && this->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
+    if (GetCharmInfo() && GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
     {
-        this->GetCharmInfo()->SetIsCommandAttack(false);
-        this->GetCharmInfo()->SetIsAtStay(false);
-        this->GetCharmInfo()->SetIsFollowing(false);
-        this->GetCharmInfo()->SetIsReturning(false);
+        GetCharmInfo()->SetIsCommandAttack(false);
+        GetCharmInfo()->SetIsCommandFollow(true);
+        GetCharmInfo()->SetIsAtStay(false);
+        GetCharmInfo()->SetIsFollowing(false);
+        GetCharmInfo()->SetIsReturning(false);
     }
 }
 
@@ -170,7 +171,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     Map* map = owner->GetMap();
     uint32 guid = sObjectMgr.GenerateLowGuid(HIGHGUID_PET);
     uint32 pet_number = fields[0].GetUInt32();
-    if (!Create(guid, map, petentry, pet_number))
+    if (!Create(guid, map, owner->GetPhaseMask(), petentry, pet_number))
         return false;
 
     float px, py, pz;
@@ -186,7 +187,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     }
 
     setPetType(PetType(fields[22].GetUInt8()));
-    SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, owner->getFaction());
+    SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, owner->GetFaction());
     SetUInt32Value(UNIT_CREATED_BY_SPELL, summon_spell_id);
 
     CreatureInfo const* cinfo = GetCreatureTemplate();
@@ -403,6 +404,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
             std::string name = m_name;
             CharacterDatabase.escape_string(name);
             CharacterDatabase.BeginTransaction();
+
             // remove current data
             CharacterDatabase.PExecute("DELETE FROM character_pet WHERE owner = '%u' AND id = '%u'", owner, m_charmInfo->GetPetNumber());
 
@@ -421,7 +423,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
                 << GetEntry() << ", "
                 << owner << ", "
                 << GetNativeDisplayId() << ", "
-                << getLevel() << ", "
+                << uint32(getLevel()) << ", "
                 << GetUInt32Value(UNIT_FIELD_PETEXPERIENCE) << ", "
                 << uint32(GetReactState()) << ", "
                 << m_loyaltyPoints << ", "
@@ -866,16 +868,15 @@ void Pet::GivePetXP(uint32 xp)
         return;
 
     uint32 level = getLevel();
-    uint32 maxlevel = std::min(sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL), GetOwner()->getLevel());
-
-    // pet not receive xp for level equal to owner level
-    if (level >= maxlevel)
-        return;
+    uint8 maxlevel = std::min((uint8)sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL), GetOwner()->getLevel());
 
     uint32 nextLvlXP = GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP);
     uint32 curXP = GetUInt32Value(UNIT_FIELD_PETEXPERIENCE);
     uint32 newXP = curXP + xp;
 
+    // Don't give pet next level if current pet level = player level.
+    if(newXP >= nextLvlXP && level >= maxlevel)
+        return;
 
     while (newXP >= nextLvlXP && level < maxlevel)
     {
@@ -887,7 +888,7 @@ void Pet::GivePetXP(uint32 xp)
         nextLvlXP = GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP);
     }
 
-    SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, level < maxlevel ? newXP : 0);
+    SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, level <= maxlevel ? newXP : 0);
 
     if (getPetType() == HUNTER_PET)
         KillLoyaltyBonus(level);
@@ -913,7 +914,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
 
     sLog.outDebug("Create pet");
     uint32 pet_number = sObjectMgr.GeneratePetNumber();
-    if (!Create(guid, creature->GetMap(), creature->GetEntry(), pet_number))
+    if (!Create(guid, creature->GetMap(), creature->GetPhaseMask(), creature->GetEntry(), pet_number))
         return false;
 
     Relocate(creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation());
@@ -1455,6 +1456,9 @@ void Pet::_SaveAuras()
                     uint8 i;
                     for (i = 0; i < 3; i++)
                         if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_STEALTH ||
+                            spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_CHARM ||
+                            spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_POSSESS ||
+                            spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_POSSESS_PET ||
                             spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA_OWNER ||
                             spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA_PET)
                             break;
@@ -1763,10 +1767,11 @@ bool Pet::IsPermanentPetFor(Player* owner)
     }
 }
 
-bool Pet::Create(uint32 guidlow, Map* map, uint32 Entry, uint32 pet_number)
+bool Pet::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, uint32 pet_number)
 {
     ASSERT(map);
     SetMap(map);
+    SetPhaseMask(phaseMask, false);
 
     Object::_Create(guidlow, pet_number, HIGHGUID_PET);
 

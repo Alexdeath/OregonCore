@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -1048,7 +1048,7 @@ void hyjalAI::HideNearPos(float x, float y)
     // First get all creatures.
     std::list<Creature*> creatures;
     Oregon::AllFriendlyCreaturesInGrid creature_check(me);
-    Oregon::CreatureListSearcher<Oregon::AllFriendlyCreaturesInGrid> creature_searcher(creatures, creature_check);
+    Oregon::CreatureListSearcher<Oregon::AllFriendlyCreaturesInGrid> creature_searcher(me, creatures, creature_check);
     TypeContainerVisitor <Oregon::CreatureListSearcher<Oregon::AllFriendlyCreaturesInGrid>, GridTypeMapContainer> creature_visitor(creature_searcher); 
     cell.Visit(pair, creature_visitor, *(me->GetMap()), *me, me->GetGridActivationRange());
 
@@ -1057,7 +1057,7 @@ void hyjalAI::HideNearPos(float x, float y)
         for (std::list<Creature*>::iterator itr = creatures.begin(); itr != creatures.end(); ++itr)
         {
             (*itr)->SetVisible(false);
-            (*itr)->setFaction(35);//make them friendly so mobs won't attack them
+            (*itr)->SetFaction(35);//make them friendly so mobs won't attack them
         }
     }
 }
@@ -1069,7 +1069,7 @@ void hyjalAI::RespawnNearPos(float x, float y)
     cell.SetNoCreate();
 
     Oregon::RespawnDo u_do;
-    Oregon::WorldObjectWorker<Oregon::RespawnDo> worker(u_do);
+    Oregon::WorldObjectWorker<Oregon::RespawnDo> worker(me, u_do);
     TypeContainerVisitor<Oregon::WorldObjectWorker<Oregon::RespawnDo>, GridTypeMapContainer > obj_worker(worker);
     cell.Visit(p, obj_worker, *me->GetMap(), *me, me->GetGridActivationRange());
 }
@@ -1102,7 +1102,7 @@ void hyjalAI::WaypointReached(uint32 i)
         // First get all creatures.
         std::list<Creature*> creatures;
         Oregon::AllFriendlyCreaturesInGrid creature_check(me);
-        Oregon::CreatureListSearcher<Oregon::AllFriendlyCreaturesInGrid> creature_searcher(creatures, creature_check);
+        Oregon::CreatureListSearcher<Oregon::AllFriendlyCreaturesInGrid> creature_searcher(me, creatures, creature_check);
         TypeContainerVisitor
         <Oregon::CreatureListSearcher<Oregon::AllFriendlyCreaturesInGrid>,
         GridTypeMapContainer> creature_visitor(creature_searcher);
@@ -1143,7 +1143,7 @@ void hyjalAI::DoOverrun(uint32 faction, const uint32 diff)
 
             std::list<Creature*> creatures;
             Oregon::AllFriendlyCreaturesInGrid creature_check(me);
-            Oregon::CreatureListSearcher<Oregon::AllFriendlyCreaturesInGrid> creature_searcher(creatures, creature_check);
+            Oregon::CreatureListSearcher<Oregon::AllFriendlyCreaturesInGrid> creature_searcher(me, creatures, creature_check);
             TypeContainerVisitor
             <Oregon::CreatureListSearcher<Oregon::AllFriendlyCreaturesInGrid>,
             GridTypeMapContainer> creature_visitor(creature_searcher);
@@ -1157,7 +1157,7 @@ void hyjalAI::DoOverrun(uint32 faction, const uint32 diff)
                     if ((*itr) && (*itr)->IsAlive())
                     {
                         (*itr)->CastSpell(*itr, SPELL_TELEPORT_VISUAL, true);
-                        (*itr)->setFaction(35);//make them friendly so mobs won't attack them
+                        (*itr)->SetFaction(35);//make them friendly so mobs won't attack them
                         (*itr)->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     }
                 }

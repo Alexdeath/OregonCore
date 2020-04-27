@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Common.h"
@@ -44,7 +44,7 @@ void WorldSession::HandleAttackSwingOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if (!_player->canAttack(pEnemy))
+    if (!_player->IsValidAttackTarget(pEnemy))
     {
         // stop attack state at client
         SendAttackStop(pEnemy);

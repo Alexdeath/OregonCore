@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Common.h"
@@ -79,7 +79,7 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recv_data)
 
     recv_data >> guid >> menuId >> gossipListId;
 
-    if (_player->PlayerTalkClass->GossipOptionCoded(gossipListId))
+    if (_player->PlayerTalkClass->IsGossipOptionCoded(gossipListId))
     {
         // recheck
         sLog.outBasic("reading string");
@@ -122,13 +122,13 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recv_data)
         if (unit)
         {
             unit->AI()->sGossipSelectCode(_player, menuId, gossipListId, code.c_str());
-            if (!sScriptMgr.GossipSelectWithCode(_player, unit, _player->PlayerTalkClass->GossipOptionSender(gossipListId), _player->PlayerTalkClass->GossipOptionAction(gossipListId), code.c_str()))
+            if (!sScriptMgr.GossipSelectWithCode(_player, unit, _player->PlayerTalkClass->GetGossipOptionSender(gossipListId), _player->PlayerTalkClass->GetGossipOptionAction(gossipListId), code.c_str()))
                 _player->OnGossipSelect(unit, gossipListId, menuId);
         }
         else
         {
             go->AI()->GossipSelectCode(_player, menuId, gossipListId, code.c_str());
-            sScriptMgr.GOSelectWithCode(_player, go, _player->PlayerTalkClass->GossipOptionSender(gossipListId), _player->PlayerTalkClass->GossipOptionAction(gossipListId), code.c_str());
+            sScriptMgr.GOSelectWithCode(_player, go, _player->PlayerTalkClass->GetGossipOptionSender(gossipListId), _player->PlayerTalkClass->GetGossipOptionAction(gossipListId), code.c_str());
         }
     }
     else
@@ -136,13 +136,13 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recv_data)
         if (unit)
         {
             unit->AI()->sGossipSelect(_player, menuId, gossipListId);
-            if (!sScriptMgr.GossipSelect(_player, unit, _player->PlayerTalkClass->GossipOptionSender(gossipListId), _player->PlayerTalkClass->GossipOptionAction(gossipListId)))
+            if (!sScriptMgr.GossipSelect(_player, unit, _player->PlayerTalkClass->GetGossipOptionSender(gossipListId), _player->PlayerTalkClass->GetGossipOptionAction(gossipListId)))
                 _player->OnGossipSelect(unit, gossipListId, menuId);
         }
         else
         {
             go->AI()->GossipSelect(_player, menuId, gossipListId);
-            sScriptMgr.GOSelect(_player, go, _player->PlayerTalkClass->GossipOptionSender(gossipListId), _player->PlayerTalkClass->GossipOptionAction(gossipListId));
+            sScriptMgr.GOSelect(_player, go, _player->PlayerTalkClass->GetGossipOptionSender(gossipListId), _player->PlayerTalkClass->GetGossipOptionAction(gossipListId));
         }
     }
 }
@@ -376,7 +376,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recv_data*/)
     }
 
     //instant logout in taverns/cities or on taxi or for admins, gm's, mod's if its enabled in OregonCore.conf
-    if (GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || GetPlayer()->isInFlight() ||
+    if (GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || GetPlayer()->IsInFlight() ||
         GetSecurity() >= sWorld.getConfig(CONFIG_INSTANT_LOGOUT))
     {
         LogoutPlayer(true);
@@ -386,7 +386,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recv_data*/)
     // not set flags if player can't free move to prevent lost state at logout cancel
     if (GetPlayer()->CanFreeMove())
     {
-        if (GetPlayer()->getStandState() == UNIT_STAND_STATE_STAND)
+        if (GetPlayer()->GetStandState() == UNIT_STAND_STATE_STAND)
             GetPlayer()->SetStandState(UNIT_STAND_STATE_SIT);
 
         WorldPacket data(SMSG_FORCE_MOVE_ROOT, (8 + 4));  // guess size
@@ -489,7 +489,7 @@ void WorldSession::HandleSetTargetOpcode(WorldPacket& recv_data)
     if (!unit)
         return;
 
-    if (FactionTemplateEntry const* factionTemplateEntry = sFactionTemplateStore.LookupEntry(unit->getFaction()))
+    if (FactionTemplateEntry const* factionTemplateEntry = sFactionTemplateStore.LookupEntry(unit->GetFaction()))
         _player->GetReputationMgr().SetVisible(factionTemplateEntry);
 }
 
@@ -781,7 +781,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
 
     DEBUG_LOG("Trigger ID:%u", triggerId);
 
-    if (GetPlayer()->isInFlight())
+    if (GetPlayer()->IsInFlight())
     {
         DEBUG_LOG("Player '%s' (GUID: %u) in flight, ignore Area Trigger ID:%u", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), triggerId);
         return;
@@ -1095,6 +1095,9 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     if (!GetPlayer()->IsWithinDistInMap(player, INSPECT_DISTANCE, false))
         return;
 
+    if (_player->IsHostileTo(player))
+        return;
+
     uint32 talent_points = 0x3D;
     uint32 guid_size = player->GetPackGUID().size();
     WorldPacket data(SMSG_INSPECT_TALENT, 4 + talent_points);
@@ -1188,7 +1191,7 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
 
     WorldPacket data(MSG_INSPECT_HONOR_STATS, 8 + 1 + 4 * 4);
     data << uint64(player->GetGUID());
-    data << uint8(player->GetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY));
+    data << uint8(player->GetHighestPvPRankIndex());
     data << uint32(player->GetUInt32Value(PLAYER_FIELD_KILLS));
     data << uint32(player->GetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION));
     data << uint32(player->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION));
@@ -1218,7 +1221,7 @@ void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
 
     DEBUG_LOG("Received opcode CMSG_WORLD_TELEPORT");
 
-    if (GetPlayer()->isInFlight())
+    if (GetPlayer()->IsInFlight())
     {
         sLog.outDebug("Player '%s' (GUID: %u) in flight, ignore worldport command.", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
         return;
@@ -1491,7 +1494,7 @@ void WorldSession::HandleDismountOpcode(WorldPacket& /*recv_data*/)
         return;
     }
 
-    if (_player->isInFlight())                               // not blizz like; no any messages on blizz
+    if (_player->IsInFlight())                               // not blizz like; no any messages on blizz
     {
         ChatHandler(this).SendSysMessage(LANG_YOU_IN_FLIGHT);
         return;
@@ -1503,10 +1506,12 @@ void WorldSession::HandleDismountOpcode(WorldPacket& /*recv_data*/)
 
 void WorldSession::HandleRequestPetInfoOpcode(WorldPacket& /*recv_data */)
 {
-    /*
-        DEBUG_LOG("WORLD: CMSG_REQUEST_PET_INFO");
-        recv_data.hexlike();
-    */
+    DEBUG_LOG("WORLD: CMSG_REQUEST_PET_INFO");
+
+    if (_player->GetPet())
+        _player->PetSpellInitialize();
+    else if (_player->GetCharm())
+        _player->CharmSpellInitialize();
 }
 
 void WorldSession::HandleSetTaxiBenchmarkOpcode(WorldPacket& recv_data)

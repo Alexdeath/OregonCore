@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -106,7 +106,7 @@ void FollowerAI::MoveInLineOfSight(Unit* pWho)
         if (HasFollowState(STATE_FOLLOW_INPROGRESS) && AssistPlayerInCombat(pWho))
             return;
 
-        if (!me->canFly() && me->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
+        if (!me->CanFly() && me->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
             return;
 
         if (me->IsHostileTo(pWho))
@@ -141,23 +141,24 @@ void FollowerAI::JustDied(Unit* /*pKiller*/)
         return;
 
     //@todo need a better check for quests with time limit.
-    if (Player* pPlayer = GetLeaderForFollower())
+    if (Player* player = GetLeaderForFollower())
     {
-        if (Group* pGroup = pPlayer->GetGroup())
+        if (Group* pGroup = player->GetGroup())
         {
             for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != NULL; pRef = pRef->next())
             {
-                if (Player* pMember = pRef->GetSource())
+                if (Player* member = pRef->GetSource())
                 {
-                    if (pMember->GetQuestStatus(m_pQuestForFollow->GetQuestId()) == QUEST_STATUS_INCOMPLETE)
-                        pMember->FailQuest(m_pQuestForFollow->GetQuestId());
+                    if (member->GetQuestStatus(m_pQuestForFollow->GetQuestId()) == QUEST_STATUS_INCOMPLETE)
+                        if (member->IsInMap(player))
+                            member->FailQuest(m_pQuestForFollow->GetQuestId());
                 }
             }
         }
         else
         {
-            if (pPlayer->GetQuestStatus(m_pQuestForFollow->GetQuestId()) == QUEST_STATUS_INCOMPLETE)
-                pPlayer->FailQuest(m_pQuestForFollow->GetQuestId());
+            if (player->GetQuestStatus(m_pQuestForFollow->GetQuestId()) == QUEST_STATUS_INCOMPLETE)
+                player->FailQuest(m_pQuestForFollow->GetQuestId());
         }
     }
 }
@@ -169,8 +170,8 @@ void FollowerAI::JustRespawned()
     if (!IsCombatMovement())
         SetCombatMovement(true);
 
-    if (me->getFaction() != me->GetCreatureTemplate()->faction)
-        me->setFaction(me->GetCreatureTemplate()->faction);
+    if (me->GetFaction() != me->GetCreatureTemplate()->faction)
+        me->SetFaction(me->GetCreatureTemplate()->faction);
 
     Reset();
 }
@@ -307,7 +308,7 @@ void FollowerAI::StartFollow(Player* pLeader, uint32 uiFactionForFollower, const
     m_uiLeaderGUID = pLeader->GetGUID();
 
     if (uiFactionForFollower)
-        me->setFaction(uiFactionForFollower);
+        me->SetFaction(uiFactionForFollower);
 
     m_pQuestForFollow = pQuest;
 
@@ -339,13 +340,13 @@ Player* FollowerAI::GetLeaderForFollower()
             {
                 for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != NULL; pRef = pRef->next())
                 {
-                    Player* pMember = pRef->GetSource();
+                    Player* member = pRef->GetSource();
 
-                    if (pMember && pMember->IsAlive() && me->IsWithinDistInMap(pMember, MAX_PLAYER_DISTANCE))
+                    if (member && me->IsWithinDistInMap(member, MAX_PLAYER_DISTANCE) && member->IsAlive())
                     {
                         sLog.outDebug("OSCR: FollowerAI GetLeader changed and returned new leader.");
-                        m_uiLeaderGUID = pMember->GetGUID();
-                        return pMember;
+                        m_uiLeaderGUID = member->GetGUID();
+                        return member;
                         break;
                     }
                 }

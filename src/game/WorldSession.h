@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef __WORLDSESSION_H
@@ -410,6 +410,7 @@ class WorldSession
         void HandleLootMethodOpcode(WorldPacket& recvPacket);
         void HandleLootRoll(WorldPacket& recv_data);
         void HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data);
+        void HandleGroupSwapSubGroupOpcode(WorldPacket& recv_data);
         void HandleRaidIconTargetOpcode(WorldPacket& recv_data);
         void HandleRaidReadyCheckOpcode(WorldPacket& recv_data);
         void HandleRaidReadyCheckFinishOpcode(WorldPacket& recv_data);
@@ -572,8 +573,8 @@ class WorldSession
         void HandleResurrectResponseOpcode(WorldPacket& recvPacket);
         void HandleSummonResponseOpcode(WorldPacket& recv_data);
 
-        void HandleChannelJoin(WorldPacket& recvPacket);
-        void HandleChannelLeave(WorldPacket& recvPacket);
+        void HandleJoinChannel(WorldPacket& recvPacket);
+        void HandleLeaveChannel(WorldPacket& recvPacket);
         void HandleChannelList(WorldPacket& recvPacket);
         void HandleChannelPassword(WorldPacket& recvPacket);
         void HandleChannelSetOwner(WorldPacket& recvPacket);
@@ -589,8 +590,8 @@ class WorldSession
         void HandleChannelAnnounce(WorldPacket& recvPacket);
         void HandleChannelModerate(WorldPacket& recvPacket);
         void HandleChannelRosterQuery(WorldPacket& recvPacket);
-        void HandleChannelInfoQuery(WorldPacket& recvPacket);
-        void HandleChannelJoinNotify(WorldPacket& recvPacket);
+        void HandleGetChannelMemberCount(WorldPacket& recvPacket);
+        void HandleSetChannelWatch(WorldPacket& recvPacket);
 
         void HandleCompleteCinema(WorldPacket& recvPacket);
         void HandleNextCinematicCamera(WorldPacket& recvPacket);
@@ -605,6 +606,7 @@ class WorldSession
         //Pet
         void HandlePetAction(WorldPacket& recv_data);
         void HandlePetActionHelper(Unit* pet, uint64 guid1, uint16 spellid, uint16 flag, uint64 guid2);
+        void HandlePetStopAttack(WorldPacket& recv_data);
         void HandlePetNameQuery(WorldPacket& recv_data);
         void HandlePetSetAction(WorldPacket& recv_data);
         void HandlePetAbandon(WorldPacket& recv_data);

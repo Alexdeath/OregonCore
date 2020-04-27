@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -42,7 +42,7 @@ EndContentData */
 
 bool GossipHello_npc_kalaran_windblade(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
     if (pPlayer->GetQuestStatus(3441) == QUEST_STATUS_INCOMPLETE)
@@ -81,7 +81,7 @@ bool GossipSelect_npc_kalaran_windblade(Player* pPlayer, Creature* pCreature, ui
 
 bool GossipHello_npc_lothos_riftwaker(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
     if (pPlayer->GetQuestRewardStatus(7487) || pPlayer->GetQuestRewardStatus(7848))
@@ -113,7 +113,7 @@ bool GossipSelect_npc_lothos_riftwaker(Player* pPlayer, Creature* /*pCreature*/,
 
 bool GossipHello_npc_zamael_lunthistle(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
     if (pPlayer->GetQuestStatus(3377) == QUEST_STATUS_INCOMPLETE)

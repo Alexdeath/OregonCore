@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef _MOVE_MAP_H
@@ -26,7 +26,7 @@
 #include "DetourNavMeshQuery.h"
 
 //  memory management
-inline void* dtCustomAlloc(int size, dtAllocHint /*hint*/)
+inline void* dtCustomAlloc(size_t size, dtAllocHint /*hint*/)
 {
     return (void*)new unsigned char[size];
 }

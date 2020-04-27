@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -219,7 +219,7 @@ bool QuestAccept_npc_dalinda(Player* pPlayer, Creature* pCreature, Quest const* 
         if (npc_escortAI* pEscortAI = CAST_AI(npc_dalindaAI, pCreature->AI()))
         {
             pEscortAI->Start(true, false, pPlayer->GetGUID());
-            pCreature->setFaction(113);
+            pCreature->SetFaction(113);
         }
     }
     return true;
@@ -272,7 +272,7 @@ struct npc_melizza_brimbuzzleAI : public npc_escortAI
             switch (uiPointId)
             {
             case 1:
-                me->setFaction(113);
+                me->SetFaction(113);
                 DoScriptText(SAY_START, me, pPlayer);
                 break;
             case 7:
@@ -397,13 +397,13 @@ void AddSC_desolace()
     newscript = new Script;
     newscript->Name = "npc_dalinda";
     newscript->GetAI = &GetAI_npc_dalinda;
-    newscript->pQuestAccept = &QuestAccept_npc_dalinda;
+    newscript->QuestAccept = &QuestAccept_npc_dalinda;
     newscript->RegisterSelf();
 
     newscript = new Script;
     newscript->Name = "npc_melizza_brimbuzzle";
     newscript->GetAI = &GetAI_npc_melizza_brimbuzzle;
-    newscript->pQuestAccept = &QuestAccept_npc_melizza_brimbuzzle;
+    newscript->QuestAccept = &QuestAccept_npc_melizza_brimbuzzle;
     newscript->RegisterSelf();
 
     newscript = new Script;

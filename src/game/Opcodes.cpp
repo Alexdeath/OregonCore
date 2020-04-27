@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Opcodes.h"
@@ -172,8 +172,8 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x094*/ { "UMSG_UPDATE_GUILD",                STATUS_NEVER,    &WorldSession::Handle_NULL                     },
     /*0x095*/ { "CMSG_MESSAGECHAT",                 STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode         },
     /*0x096*/ { "SMSG_MESSAGECHAT",                 STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
-    /*0x097*/ { "CMSG_JOIN_CHANNEL",                STATUS_LOGGEDIN, &WorldSession::HandleChannelJoin               },
-    /*0x098*/ { "CMSG_LEAVE_CHANNEL",               STATUS_LOGGEDIN, &WorldSession::HandleChannelLeave              },
+    /*0x097*/ { "CMSG_JOIN_CHANNEL",                STATUS_LOGGEDIN, &WorldSession::HandleJoinChannel               },
+    /*0x098*/ { "CMSG_LEAVE_CHANNEL",               STATUS_LOGGEDIN, &WorldSession::HandleLeaveChannel              },
     /*0x099*/ { "SMSG_CHANNEL_NOTIFY",              STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x09A*/ { "CMSG_CHANNEL_LIST",                STATUS_LOGGEDIN, &WorldSession::HandleChannelList               },
     /*0x09B*/ { "SMSG_CHANNEL_LIST",                STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
@@ -661,7 +661,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x27D*/ { "CMSG_ENABLE_DAMAGE_LOG",           STATUS_NEVER,    &WorldSession::Handle_NULL                     },
     /*0x27E*/ { "CMSG_GROUP_CHANGE_SUB_GROUP",      STATUS_LOGGEDIN, &WorldSession::HandleGroupChangeSubGroupOpcode },
     /*0x27F*/ { "CMSG_REQUEST_PARTY_MEMBER_STATS",  STATUS_LOGGEDIN, &WorldSession::HandleRequestPartyMemberStatsOpcode},
-    /*0x280*/ { "CMSG_GROUP_SWAP_SUB_GROUP",        STATUS_NEVER,    &WorldSession::Handle_NULL                     },
+    /*0x280*/ { "CMSG_GROUP_SWAP_SUB_GROUP",        STATUS_LOGGEDIN, &WorldSession::HandleGroupSwapSubGroupOpcode   },
     /*0x281*/ { "CMSG_RESET_FACTION_CHEAT",         STATUS_NEVER,    &WorldSession::Handle_NULL                     },
     /*0x282*/ { "CMSG_AUTOSTORE_BANK_ITEM",         STATUS_LOGGEDIN, &WorldSession::HandleAutoStoreBankItemOpcode   },
     /*0x283*/ { "CMSG_AUTOBANK_ITEM",               STATUS_LOGGEDIN, &WorldSession::HandleAutoBankItemOpcode        },
@@ -767,7 +767,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x2E7*/ { "CMSG_WARDEN_DATA",                 STATUS_AUTHED,   &WorldSession::HandleWardenDataOpcode          },
     /*0x2E8*/ { "SMSG_GROUP_JOINED_BATTLEGROUND",   STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x2E9*/ { "MSG_BATTLEGROUND_PLAYER_POSITIONS", STATUS_LOGGEDIN, &WorldSession::HandleBattlegroundPlayerPositionsOpcode},
-    /*0x2EA*/ { "CMSG_PET_STOP_ATTACK",             STATUS_NEVER,    &WorldSession::Handle_NULL                     },
+    /*0x2EA*/ { "CMSG_PET_STOP_ATTACK",             STATUS_LOGGEDIN, &WorldSession::HandlePetStopAttack },
     /*0x2EB*/ { "SMSG_BINDER_CONFIRM",              STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x2EC*/ { "SMSG_BATTLEGROUND_PLAYER_JOINED",  STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x2ED*/ { "SMSG_BATTLEGROUND_PLAYER_LEFT",    STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
@@ -1000,7 +1000,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x3D0*/ { "CMSG_TARGET_SCRIPT_CAST",          STATUS_NEVER,    &WorldSession::Handle_NULL                     },
     /*0x3D1*/ { "CMSG_CHANNEL_DISPLAY_LIST",        STATUS_LOGGEDIN, &WorldSession::HandleChannelRosterQuery        },
     /*0x3D2*/ { "CMSG_SET_ACTIVE_VOICE_CHANNEL",    STATUS_AUTHED,   &WorldSession::HandleChannelVoiceChatQuery     },
-    /*0x3D3*/ { "CMSG_GET_CHANNEL_MEMBER_COUNT",    STATUS_LOGGEDIN, &WorldSession::HandleChannelInfoQuery          },
+    /*0x3D3*/ { "CMSG_GET_CHANNEL_MEMBER_COUNT",    STATUS_LOGGEDIN, &WorldSession::HandleGetChannelMemberCount     },
     /*0x3D4*/ { "SMSG_CHANNEL_MEMBER_COUNT",        STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x3D5*/ { "CMSG_CHANNEL_VOICE_ON",            STATUS_LOGGEDIN, &WorldSession::HandleChannelEnableVoiceOpcode  },
     /*0x3D6*/ { "CMSG_CHANNEL_VOICE_OFF",           STATUS_NEVER,    &WorldSession::Handle_NULL                     },
@@ -1027,7 +1027,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x3EB*/ { "CMSG_GUILD_BANK_DEPOSIT_MONEY",    STATUS_LOGGEDIN, &WorldSession::HandleGuildBankDeposit          },
     /*0x3EC*/ { "CMSG_GUILD_BANK_WITHDRAW_MONEY",   STATUS_LOGGEDIN, &WorldSession::HandleGuildBankWithdraw         },
     /*0x3ED*/ { "MSG_GUILD_BANK_LOG_QUERY",         STATUS_LOGGEDIN, &WorldSession::HandleGuildBankLog              },
-    /*0x3EE*/ { "CMSG_SET_CHANNEL_WATCH",           STATUS_LOGGEDIN, &WorldSession::HandleChannelJoinNotify         },
+    /*0x3EE*/ { "CMSG_SET_CHANNEL_WATCH",           STATUS_LOGGEDIN, &WorldSession::HandleSetChannelWatch           },
     /*0x3EF*/ { "SMSG_USERLIST_ADD",                STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x3F0*/ { "SMSG_USERLIST_REMOVE",             STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x3F1*/ { "SMSG_USERLIST_UPDATE",             STATUS_NEVER,    &WorldSession::Handle_ServerSide               },

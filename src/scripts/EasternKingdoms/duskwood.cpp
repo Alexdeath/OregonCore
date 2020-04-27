@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -70,7 +70,7 @@ bool AreaTrigger_at_twilight_grove(Player* pPlayer, const AreaTriggerEntry* /*at
 
         if (Creature* TCorrupter = pPlayer->SummonCreature(NPC_TWILINGHT_CORRUPTER, -10328.16f, -489.57f, 49.95f, 0, TEMPSUMMON_MANUAL_DESPAWN, 60000))
         {
-            TCorrupter->setFaction(14);
+            TCorrupter->SetFaction(14);
             TCorrupter->SetMaxHealth(832750);
         }
     }

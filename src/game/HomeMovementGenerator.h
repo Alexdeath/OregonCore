@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef OREGON_HOMEMOVEMENTGENERATOR_H
@@ -32,7 +32,7 @@ class HomeMovementGenerator<Creature>
 {
     public:
 
-        HomeMovementGenerator() {}
+        HomeMovementGenerator() : skipToHome(false) {}
         ~HomeMovementGenerator() {}
 
         void Initialize(Creature&);
@@ -49,6 +49,7 @@ class HomeMovementGenerator<Creature>
 
         float ori;
         bool arrived;
+        bool skipToHome;
 };
 #endif
 

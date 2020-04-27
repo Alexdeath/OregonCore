@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -580,6 +580,7 @@ struct boss_croneAI : public ScriptedAI
 
     void Reset()
     {
+        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NON_ATTACKABLE);
         CycloneTimer = 30000;
         ChainLightningTimer = 10000;
     }
@@ -592,8 +593,6 @@ struct boss_croneAI : public ScriptedAI
     void EnterCombat(Unit* /*who*/)
     {
         DoScriptText(RAND(SAY_CRONE_AGGRO, SAY_CRONE_AGGRO2), me);
-        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
     }
 
     void JustDied(Unit* /*killer*/)
@@ -615,9 +614,6 @@ struct boss_croneAI : public ScriptedAI
     {
         if (!UpdateVictim())
             return;
-
-        if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
         if (CycloneTimer <= diff)
         {
@@ -1278,7 +1274,7 @@ void boss_julianneAI::UpdateAI(const uint32 diff)
         {
             DoScriptText(SAY_JULIANNE_AGGRO, me);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            me->setFaction(16);
+            me->SetFaction(16);
             AggroYellTimer = 0;
         }
         else AggroYellTimer -= diff;
@@ -1308,7 +1304,7 @@ void boss_julianneAI::UpdateAI(const uint32 diff)
                 CAST_AI(boss_romuloAI, pRomulo->AI())->Phase = PHASE_ROMULO;
                 DoZoneInCombat(pRomulo);
 
-                pRomulo->setFaction(16);
+                pRomulo->SetFaction(16);
             }
             SummonedRomulo = true;
         }

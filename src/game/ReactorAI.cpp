@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 #include "ByteBuffer.h"
 #include "ReactorAI.h"
@@ -22,7 +22,7 @@
 int
 ReactorAI::Permissible(const Creature* creature)
 {
-    if (creature->isCivilian() || creature->IsNeutralToAll())
+    if (creature->IsCivilian() || creature->IsNeutralToAll())
         return PERMIT_BASE_REACTIVE;
 
     return PERMIT_BASE_NO;

@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -73,7 +73,7 @@ bool GossipSelect_npc_blood_knight_dawnstar(Player* pPlayer, Creature* /*pCreatu
 
 bool GossipHello_npc_budd_nedreck(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
     if (pPlayer->GetQuestStatus(11166) == QUEST_STATUS_INCOMPLETE)
@@ -99,10 +99,10 @@ bool GossipSelect_npc_budd_nedreck(Player* pPlayer, Creature* pCreature, uint32 
 
 bool GossipHello_npc_rathis_tomber(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
-    if (pCreature->isVendor() && pPlayer->GetQuestRewardStatus(9152))
+    if (pCreature->IsVendor() && pPlayer->GetQuestRewardStatus(9152))
     {
         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_TEXT_BROWSE_GOODS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
         pPlayer->SEND_GOSSIP_MENU(8432, pCreature->GetGUID());
@@ -230,7 +230,7 @@ bool QuestAccept_npc_ranger_lilatha(Player* pPlayer, Creature* pCreature, Quest 
 {
     if (quest->GetQuestId() == QUEST_ESCAPE_FROM_THE_CATACOMBS)
     {
-        pCreature->setFaction(113);
+        pCreature->SetFaction(113);
 
         if (npc_escortAI* pEscortAI = CAST_AI(npc_ranger_lilathaAI, pCreature->AI()))
             pEscortAI->Start(true, false, pPlayer->GetGUID());
@@ -273,6 +273,6 @@ void AddSC_ghostlands()
     newscript = new Script;
     newscript->Name = "npc_ranger_lilatha";
     newscript->GetAI = &GetAI_npc_ranger_lilathaAI;
-    newscript->pQuestAccept = &QuestAccept_npc_ranger_lilatha;
+    newscript->QuestAccept = &QuestAccept_npc_ranger_lilatha;
     newscript->RegisterSelf();
 }

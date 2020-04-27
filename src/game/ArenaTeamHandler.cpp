@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Player.h"
@@ -40,6 +40,9 @@ void WorldSession::HandleInspectArenaStatsOpcode(WorldPacket& recv_data)
         return;
 
     if (!GetPlayer()->IsWithinDistInMap(player, INSPECT_DISTANCE, false))
+        return;
+
+    if (_player->IsHostileTo(player))
         return;
 
     for (uint8 i = 0; i < MAX_ARENA_SLOT; ++i)

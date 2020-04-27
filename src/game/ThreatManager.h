@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef _THREATMANAGER
@@ -214,6 +214,7 @@ class ThreatManager
         float getThreat(Unit* victim, bool alsoSearchOfflineList = false);
 
         bool isThreatListEmpty() const { return iThreatContainer.empty(); }
+        bool areThreatListsEmpty() const { return iThreatContainer.empty() && iThreatOfflineContainer.empty(); }
 
         void processThreatEvent(ThreatRefStatusChangeEvent* threatRefStatusChangeEvent);
 

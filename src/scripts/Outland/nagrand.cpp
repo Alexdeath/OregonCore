@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -64,18 +64,34 @@ EndContentData */
 ## mob_shattered_rumbler - this should be done with ACID
 ######*/
 
+#define SPELL_EARTH_RUMBLE  33840
+
 struct mob_shattered_rumblerAI : public ScriptedAI
 {
     bool Spawn;
 
     mob_shattered_rumblerAI(Creature* c) : ScriptedAI(c) {}
 
+    uint32 EarthRumbleTimer;
+
     void Reset()
     {
         Spawn = false;
+        EarthRumbleTimer = urand(12000, 17000);
 
-		me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, true);
+        me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, true);
     }
+
+    void UpdateAI(const uint32 diff)
+    {
+        if (EarthRumbleTimer < diff)
+        {
+            DoCast(me, SPELL_EARTH_RUMBLE);
+            EarthRumbleTimer = urand(14000, 21000);
+        }
+        else
+            EarthRumbleTimer -= diff;
+    }            
 
     void EnterCombat(Unit* /*who*/) {}
 
@@ -90,7 +106,7 @@ struct mob_shattered_rumblerAI : public ScriptedAI
             Hitter->SummonCreature(18181, x + (0.7f * (rand() % 30)), y + (rand() % 5), z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
             Hitter->SummonCreature(18181, x + (rand() % 5), y - (rand() % 5), z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
             Hitter->SummonCreature(18181, x - (rand() % 5), y + (0.5f * (rand() % 60)), z, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
-			me->DisappearAndDie();
+            me->DisappearAndDie();
             me->setDeathState(CORPSE);
             Spawn = true;
         }
@@ -154,7 +170,7 @@ struct mob_lumpAI : public ScriptedAI
                 me->RemoveAllAuras();
                 me->DeleteThreatList();
                 me->CombatStop();
-                me->setFaction(1080);               //friendly
+                me->SetFaction(1080);               //friendly
                 me->SetStandState(UNIT_STAND_STATE_SIT);
                 DoScriptText(LUMP_DEFEAT, me);
 
@@ -191,7 +207,7 @@ struct mob_lumpAI : public ScriptedAI
             {
                 EnterEvadeMode();
                 bReset = false;
-                me->setFaction(1711);               //hostile
+                me->SetFaction(1711);               //hostile
                 return;
             }
             else Reset_Timer -= diff;
@@ -302,7 +318,7 @@ CreatureAI* GetAI_mob_sunspring_villager(Creature* pCreature)
 
 bool GossipHello_npc_altruis_the_sufferer(Player* player, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         player->PrepareQuestMenu(pCreature->GetGUID());
 
     //gossip before obtaining Survey the Land
@@ -405,7 +421,7 @@ bool QuestAccept_npc_altruis_the_sufferer(Player* player, Creature* /*creature*/
 //all the textId's for the below is unknown, but i do believe the gossip item texts are proper.
 bool GossipHello_npc_greatmother_geyah(Player* player, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         player->PrepareQuestMenu(pCreature->GetGUID());
 
     if (player->GetQuestStatus(10044) == QUEST_STATUS_INCOMPLETE)
@@ -500,7 +516,7 @@ bool GossipSelect_npc_greatmother_geyah(Player* player, Creature* pCreature, uin
 
 bool GossipHello_npc_lantresor_of_the_blade(Player* player, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         player->PrepareQuestMenu(pCreature->GetGUID());
 
     if (player->GetQuestStatus(10107) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(10108) == QUEST_STATUS_INCOMPLETE)
@@ -704,7 +720,7 @@ bool QuestAccept_npc_maghar_captive(Player* pPlayer, Creature* pCreature, const 
         if (npc_maghar_captiveAI* pEscortAI = dynamic_cast<npc_maghar_captiveAI*>(pCreature->AI()))
         {
             pCreature->SetStandState(UNIT_STAND_STATE_STAND);
-            pCreature->setFaction(232);
+            pCreature->SetFaction(232);
 
             pEscortAI->Start(true, false, pPlayer->GetGUID(), pQuest);
 
@@ -1498,7 +1514,7 @@ bool QuestAccept_npc_kurenai_captive(Player* pPlayer, Creature* pCreature, const
         if (npc_kurenai_captiveAI* pEscortAI = dynamic_cast<npc_kurenai_captiveAI*>(pCreature->AI()))
         {
             pCreature->SetStandState(UNIT_STAND_STATE_STAND);
-            pCreature->setFaction(231);
+            pCreature->SetFaction(231);
 
             pEscortAI->Start(true, false, pPlayer->GetGUID(), pQuest);
             DoScriptText(SAY_KUR_START, pCreature);
@@ -2342,7 +2358,7 @@ void AddSC_nagrand()
     newscript->Name = "npc_altruis_the_sufferer";
     newscript->pGossipHello =  &GossipHello_npc_altruis_the_sufferer;
     newscript->pGossipSelect = &GossipSelect_npc_altruis_the_sufferer;
-    newscript->pQuestAccept =  &QuestAccept_npc_altruis_the_sufferer;
+    newscript->QuestAccept =  &QuestAccept_npc_altruis_the_sufferer;
     newscript->RegisterSelf();
 
     newscript = new Script;
@@ -2360,7 +2376,7 @@ void AddSC_nagrand()
     newscript = new Script;
     newscript->Name = "npc_maghar_captive";
     newscript->GetAI = &GetAI_npc_maghar_captive;
-    newscript->pQuestAccept = &QuestAccept_npc_maghar_captive;
+    newscript->QuestAccept = &QuestAccept_npc_maghar_captive;
     newscript->RegisterSelf();
 
     newscript = new Script;
@@ -2416,7 +2432,7 @@ void AddSC_nagrand()
     newscript = new Script;
     newscript->Name = "npc_kurenai_captive";
     newscript->GetAI = &GetAI_npc_kurenai_captive;
-    newscript->pQuestAccept = &QuestAccept_npc_kurenai_captive;
+    newscript->QuestAccept = &QuestAccept_npc_kurenai_captive;
     newscript->RegisterSelf();
 
 	newscript = new Script;

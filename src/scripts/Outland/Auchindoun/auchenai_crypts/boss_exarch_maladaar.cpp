@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -119,7 +119,7 @@ struct boss_exarch_maladaarAI : public ScriptedAI
             //SPELL_STOLEN_SOUL_VISUAL has shapeshift effect, but not implemented feature in OREGON for this spell.
             summoned->CastSpell(summoned, SPELL_STOLEN_SOUL_VISUAL, false);
             summoned->SetDisplayId(soulmodel);
-            summoned->setFaction(me->getFaction());
+            summoned->SetFaction(me->GetFaction());
 
             if (Unit* pTarget = Unit::GetUnit(*me, soulholder))
             {

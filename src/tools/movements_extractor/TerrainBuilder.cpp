@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "TerrainBuilder.h"
@@ -633,7 +633,7 @@ bool TerrainBuilder::loadVMap(uint32 mapID, uint32 tileX, uint32 tileY, MeshData
                     uint8 type = NAV_EMPTY;
 
                     // convert liquid type to NavTerrain
-                    switch (liquid->GetType())
+                    switch (liquid->GetType() & 3)
                     {
                     case 0:
                     case 1:

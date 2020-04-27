@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "WorldSocket.h"                                    // must be first to make ACE happy with ACE includes in it
@@ -481,7 +481,7 @@ void WorldSession::LogoutPlayer(bool Save)
 // Kick a player out of the World
 void WorldSession::KickPlayer()
 {
-    if (m_Socket)
+    if (m_Socket && !m_Socket->IsClosed())
         m_Socket->CloseSocket();
 }
 

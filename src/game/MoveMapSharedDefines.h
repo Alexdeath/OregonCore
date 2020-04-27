@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef _MOVE_MAP_SHARED_DEFINES_H
@@ -22,7 +22,7 @@
 #include "DetourNavMesh.h"
 
 #define MMAP_MAGIC 0x4d4d4150   // 'MMAP'
-#define MMAP_VERSION 3
+#define MMAP_VERSION 4
 
 struct MmapTileHeader
 {

@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -69,7 +69,7 @@ bool ItemUse_item_only_for_flight(Player* pPlayer, Item* pItem, SpellCastTargets
     }
 
     // allow use in flight only
-    if (pPlayer->isInFlight() && !disabled)
+    if (pPlayer->IsInFlight() && !disabled)
         return false;
 
     // error

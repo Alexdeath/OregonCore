@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -47,7 +47,7 @@ EndContentData */
 
 bool GossipHello_npc_mountaineer_pebblebitty(Player* pPlayer, Creature* pCreature)
 {
-    if (pCreature->isQuestGiver())
+    if (pCreature->IsQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetGUID());
 
     if (!pPlayer->GetQuestRewardStatus(3181) == 1)
@@ -149,7 +149,7 @@ bool QuestAccept_npc_miran(Player* pPlayer, Creature* pCreature, const Quest* pQ
 {
     if (pQuest->GetQuestId() == QUEST_PROTECTING_THE_SHIPMENT)
     {
-        pCreature->setFaction(231);
+        pCreature->SetFaction(231);
 
         if (npc_miranAI* pEscortAI = CAST_AI(npc_miranAI, pCreature->AI()))
             pEscortAI->Start(false, false, pPlayer->GetGUID(), pQuest);
@@ -174,6 +174,6 @@ void AddSC_loch_modan()
     newscript = new Script;
     newscript->Name = "npc_miran";
     newscript->GetAI = &GetAI_npc_miran;
-    newscript->pQuestAccept = &QuestAccept_npc_miran;
+    newscript->QuestAccept = &QuestAccept_npc_miran;
     newscript->RegisterSelf();
 }

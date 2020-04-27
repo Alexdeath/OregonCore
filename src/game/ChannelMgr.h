@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef OREGONCORE_CHANNELMGR_H
@@ -25,6 +25,8 @@
 #include <map>
 #include <string>
 
+#define MAX_CHANNEL_PASS_STR 31
+
 class ChannelMgr
 {
     public:
@@ -34,6 +36,7 @@ class ChannelMgr
         {
             for (ChannelMap::iterator itr = channels.begin(); itr != channels.end(); ++itr)
                 delete itr->second;
+
             channels.clear();
         }
         Channel* GetJoinChannel(const std::string& name, uint32 channel_id)
@@ -78,8 +81,8 @@ class ChannelMgr
         ChannelMap channels;
         void MakeNotOnPacket(WorldPacket* data, const std::string& name)
         {
-            data->Initialize(SMSG_CHANNEL_NOTIFY, (1 + 10)); // we guess size
-            (*data) << (uint8)0x05 << name;
+            data->Initialize(SMSG_CHANNEL_NOTIFY, 1 + name.size());
+            (*data) << uint8(CHAT_NOT_MEMBER_NOTICE) << name;
         }
 };
 

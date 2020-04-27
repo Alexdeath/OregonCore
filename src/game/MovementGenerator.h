@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef OREGON_MOVEMENTGENERATOR_H
@@ -48,6 +48,9 @@ class MovementGenerator
         {
             return true;
         }
+
+        // used by Evade code for select point to evade with expected restart default movement
+        virtual bool GetResetPosition(Unit&, float& /*x*/, float& /*y*/, float& /*z*/) { return false; }
 };
 
 template<class T, class D>

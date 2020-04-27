@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <ace/Message_Block.h>
@@ -28,7 +28,7 @@
 #include "WorldSocket.h"
 #include "Common.h"
 
-#include "Util.h"
+#include "Utilities/Util.h"
 #include "World.h"
 #include "WorldPacket.h"
 #include "SharedDefines.h"
@@ -77,7 +77,7 @@ WorldSocket::WorldSocket (void) :
     m_OutBuffer(0),
     m_OutBufferSize(65536),
     m_OutActive(false),
-    m_Seed(static_cast<uint32> (rand32()))
+    m_Seed(rand32())
 {
     reference_counting_policy().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
 }

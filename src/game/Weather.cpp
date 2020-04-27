@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Weather.h"
@@ -22,7 +22,7 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "Log.h"
-#include "Util.h"
+#include "Utilities/Util.h"
 
 // Create the Weather object
 Weather::Weather(uint32 zone, WeatherZoneChances const* weatherChances) : m_zone(zone), m_weatherChances(weatherChances)

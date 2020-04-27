@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "CreatureAI.h"
@@ -164,9 +164,8 @@ void CreatureAI::MoveInLineOfSight(Unit* who)
     if (me->GetCreatureType() == CREATURE_TYPE_NON_COMBAT_PET) // non-combat pets should just stand there and look good;)
         return;
 
-    if (me->canStartAttack(who))
+    if (me->HasReactState(REACT_AGGRESSIVE) && me->canStartAttack(who, false))
         AttackStart(who);
-
     //else if (who->GetVictim() && me->IsFriendlyTo(who)
     //    && me->IsWithinDistInMap(who, sWorld.getConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_RADIUS))
     //    && me->canAttack(who->GetVictim()))
@@ -185,7 +184,7 @@ void CreatureAI::TriggerAlert(Unit const* who) const
         return;
 
     // Only alert for hostiles!
-    if (me->isCivilian() || me->HasReactState(REACT_PASSIVE) || !me->IsHostileTo(who))
+    if (me->IsCivilian() || me->HasReactState(REACT_PASSIVE) || !me->IsHostileTo(who))
         return;
 
     // Send alert sound (if any) for this creature
@@ -249,7 +248,7 @@ void CreatureAI::EnterEvadeMode()
 
 void CreatureAI::SetGazeOn(Unit* target)
 {
-    if (me->canAttack(target))
+    if (me->IsValidAttackTarget(target))
     {
         AttackStart(target);
         me->SetReactState(REACT_PASSIVE);
@@ -301,8 +300,8 @@ bool CreatureAI::_EnterEvadeMode()
 
     // sometimes bosses stuck in combat?
     me->DeleteThreatList();
-    me->CombatStop(true);
-    me->SetLootRecipient(NULL);
+    me->CombatStopWithPets(true);
+    me->SetLootRecipient(nullptr);
     me->SetPlayerDamaged(false);
     me->SetLastDamagedTime(0);
 
@@ -311,8 +310,6 @@ bool CreatureAI::_EnterEvadeMode()
 
     me->RemoveAllAuras();
     me->LoadCreaturesAddon();
-    // @todo Determine if required
-    //me->SetReactState(REACT_AGGRESSIVE);
 
     return true;
 }
@@ -331,13 +328,6 @@ void CreatureAI::SetCombatMovement(bool enable)
             me->GetMotionMaster()->MoveChase(me->GetVictim());
             me->CastStop();
         }
-    }
-    else
-    {
-        me->GetMotionMaster()->MovementExpired();
-        me->GetMotionMaster()->Clear(true);
-        me->StopMoving();
-        me->GetMotionMaster()->MoveIdle();
     }
 }
 

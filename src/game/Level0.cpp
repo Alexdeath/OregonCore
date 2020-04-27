@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Common.h"
@@ -30,7 +30,7 @@
 #include "AccountMgr.h"
 #include "SystemConfig.h"
 #include "revision.h"
-#include "Util.h"
+#include "Utilities/Util.h"
 #include "Spell.h"
 
 bool ChatHandler::HandleHelpCommand(const char* args)
@@ -67,7 +67,7 @@ bool ChatHandler::HandleStartCommand(const char* /*args*/)
 {
     Player* chr = m_session->GetPlayer();
 
-    if (chr->isInFlight())
+    if (chr->IsInFlight())
     {
         SendSysMessage(LANG_YOU_IN_FLIGHT);
         SetSentErrorMessage(true);
@@ -123,7 +123,7 @@ bool ChatHandler::HandleDismountCommand(const char* /*args*/)
         return false;
     }
 
-    if (m_session->GetPlayer()->isInFlight())
+    if (m_session->GetPlayer()->IsInFlight())
     {
         SendSysMessage(LANG_YOU_IN_FLIGHT);
         SetSentErrorMessage(true);

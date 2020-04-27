@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /* ScriptData
@@ -423,7 +423,7 @@ struct boss_teron_gorefiendAI : public ScriptedAI
                 if (DoomBlossom)
                 {
                     DoomBlossom->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    DoomBlossom->setFaction(me->getFaction());
+                    DoomBlossom->SetFaction(me->GetFaction());
                     DoomBlossom->AddThreat(pTarget, 1.0f);
                     CAST_AI(mob_doom_blossomAI, DoomBlossom->AI())->SetTeronGUID(me->GetGUID());
                     pTarget->CombatStart(DoomBlossom);

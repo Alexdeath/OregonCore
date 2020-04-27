@@ -12,14 +12,14 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "LootMgr.h"
 #include "Log.h"
 #include "ObjectMgr.h"
 #include "World.h"
-#include "Util.h"
+#include "Utilities/Util.h"
 #include "SharedDefines.h"
 
 static Rates const qualityToRate[MAX_ITEM_QUALITY] =
@@ -398,7 +398,8 @@ void Loot::FillLoot(uint32 loot_id, LootStore const& store, Player* loot_owner, 
 
         for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
             if (Player* player = itr->GetSource())   // should actually be looted object instead of lootOwner but looter has to be really close so doesnt really matter
-                FillNotNormalLootFor(player);
+                if (player->IsInMap(loot_owner))
+                    FillNotNormalLootFor(player);
 
         for (uint8 i = 0; i < items.size(); ++i)
         {
@@ -680,6 +681,10 @@ uint32 Loot::GetMaxSlotInLootFor(Player* player) const
 // return true if there is any item that is lootable for any player (not quest item, FFA or conditional)
 bool Loot::hasItemForAll() const
 {
+    // Gold is always lootable
+    if (gold)
+        return true;
+
     for (LootItem const& item : items)
         if (!item.is_looted && !item.freeforall && item.conditions.empty())
             return true;

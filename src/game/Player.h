@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef _PLAYER_H
@@ -33,7 +33,7 @@
 #include "CinematicMgr.h"
 #include "Pet.h"
 #include "MapReference.h"
-#include "Util.h"                                           // for Tokens typedef
+#include "Utilities/Util.h"                                           // for Tokens typedef
 #include "ReputationMgr.h"
 
 #include<string>
@@ -363,8 +363,8 @@ enum PlayerFlags
     PLAYER_FLAGS_UNK2           = 0x00002000,               // played too long time
     PLAYER_FLAGS_UNK3           = 0x00008000,               // strange visual effect (2.0.1), looks like PLAYER_FLAGS_GHOST flag
     PLAYER_FLAGS_SANCTUARY      = 0x00010000,               // player entered sanctuary
-    PLAYER_FLAGS_UNK4           = 0x00020000,               // taxi benchmark mode (on/off) (2.0.1)
-    PLAYER_UNK                  = 0x00040000,               // 2.0.8...
+    PLAYER_FLAGS_TAXI_BENCHMARK = 0x00020000,               // taxi benchmark mode (on/off) (2.0.1)
+    PLAYER_FLAGS_PVP_TIMER      = 0x00040000,               // 2.0.8...
 };
 
 // used for PLAYER__FIELD_KNOWN_TITLES field (uint64), (1<<bit_index) without (-1)
@@ -427,7 +427,7 @@ enum PlayerFieldByteFlags
 enum PlayerFieldByte2Flags
 {
     PLAYER_FIELD_BYTE2_NONE              = 0x00,
-    PLAYER_FIELD_BYTE2_STEALTH           = 0x20,
+    PLAYER_FIELD_BYTE2_STEALTH           = 0x2000,
     PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW = 0x4000
 };
 
@@ -477,7 +477,8 @@ enum AtLoginFlags
     AT_LOGIN_NONE          = 0,
     AT_LOGIN_RENAME        = 1,
     AT_LOGIN_RESET_SPELLS  = 2,
-    AT_LOGIN_RESET_TALENTS = 4
+    AT_LOGIN_RESET_TALENTS = 4,
+    AT_LOGIN_RESURRECT     = 8
 };
 
 typedef std::map<uint32, QuestStatusData> QuestStatusMap;
@@ -923,6 +924,7 @@ class Player : public Unit, public GridObject<Player>
 {
         friend class WorldSession;
         friend class CinematicMgr;
+        friend class RegressionTestSuite;
 
         friend void Item::AddToUpdateQueueOf(Player* player);
         friend void Item::RemoveFromUpdateQueueOf(Player* player);
@@ -1079,6 +1081,8 @@ class Player : public Unit, public GridObject<Player>
         Pet* GetPet() const;
         Pet* SummonPet(uint32 entry, float x, float y, float z, float ang, PetType petType, uint32 despwtime);
         void RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent = false);
+
+        uint32 GetPhaseMaskForSpawn() const;                // used for proper set phase for DB at GM-mode creature/GO spawn
 
         void Say(const std::string& text, const uint32 language);
         void Yell(const std::string& text, const uint32 language);
@@ -1264,6 +1268,7 @@ class Player : public Unit, public GridObject<Player>
         void UpdateItemDuration(uint32 time, bool realtimeonly = false);
         void AddEnchantmentDurations(Item* item);
         void RemoveEnchantmentDurations(Item* item);
+        void RemoveEnchantmentDurationsReferences(Item* item);
         void RemoveAllEnchantments(EnchantmentSlot slot, bool arena);
         void AddEnchantmentDuration(Item* item, EnchantmentSlot slot, uint32 duration);
         void ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool apply_dur = true, bool ignore_condition = false);
@@ -1300,9 +1305,10 @@ class Player : public Unit, public GridObject<Player>
         /***                   GOSSIP SYSTEM                  ***/
         /*********************************************************/
 
-        void PrepareGossipMenu(WorldObject* pSource, uint32 menuId = 0);
-        void SendPreparedGossip(WorldObject* pSource);
-        void OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 menuId);
+        void PrepareGossipMenu(WorldObject* source, uint32 menuId = 0, bool showQuests = false);
+        void SendPreparedGossip(WorldObject* source);
+        void OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 menuId);
+
 
         uint32 GetGossipTextId(uint32 menuId, WorldObject* source);
         uint32 GetGossipTextId(WorldObject* pSource);
@@ -1329,9 +1335,11 @@ class Player : public Unit, public GridObject<Player>
         bool CanCompleteRepeatableQuest(Quest const* pQuest);
         bool CanRewardQuest(Quest const* pQuest, bool msg);
         bool CanRewardQuest(Quest const* pQuest, uint32 reward, bool msg);
+        void AddQuestAndCheckCompletion(Quest const* quest, Object* questGiver);
         void AddQuest(Quest const* pQuest, Object* questGiver);
         void CompleteQuest(uint32 quest_id);
         void IncompleteQuest(uint32 quest_id);
+        void AbandonQuest(uint32 questId);
         void RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver, bool announce = true);
 
         void FailQuest(uint32 questId);
@@ -1439,33 +1447,16 @@ class Player : public Unit, public GridObject<Player>
         void SendQuestUpdateAddItem(Quest const* pQuest, uint32 item_idx, uint32 count);
         void SendQuestUpdateAddCreatureOrGo(Quest const* pQuest, uint64 guid, uint32 creatureOrGO_idx, uint32 old_count, uint32 add_count);
 
-        uint64 GetDivider()
-        {
-            return m_divider;
-        }
-        void SetDivider(uint64 guid)
-        {
-            m_divider = guid;
-        }
+        uint32 GetSharedQuestID() const { return m_sharedQuestId; }
+        ObjectGuid GetPlayerSharingQuest() const { return m_playerSharingQuest; }
+        void SetQuestSharingInfo(ObjectGuid guid, uint32 id) { m_playerSharingQuest = guid; m_sharedQuestId = id; }
+        void ClearQuestSharingInfo() { m_playerSharingQuest = 0; m_sharedQuestId = 0; }
 
-        uint32 GetInGameTime()
-        {
-            return m_ingametime;
-        }
+        uint32 GetInGameTime() const { return m_ingametime; }
+        void SetInGameTime(uint32 time) { m_ingametime = time; }
 
-        void SetInGameTime(uint32 time)
-        {
-            m_ingametime = time;
-        }
-
-        void AddTimedQuest(uint32 quest_id)
-        {
-            m_timedquests.insert(quest_id);
-        }
-        void RemoveTimedQuest(uint32 quest_id)
-        {
-            m_timedquests.erase(quest_id);
-        }
+        void AddTimedQuest(uint32 questId) { m_timedquests.insert(questId); }
+        void RemoveTimedQuest(uint32 questId) { m_timedquests.erase(questId); }
 
         /*********************************************************/
         /***                  LOAD SYSTEM                     ***/
@@ -1910,10 +1901,9 @@ class Player : public Unit, public GridObject<Player>
         void UpdateMaxPower(Powers power) override;
         void UpdateAttackPowerAndDamage(bool ranged = false) override;
         void UpdateShieldBlockValue();
-        void UpdateDamagePhysical(WeaponAttackType attType) override;
         void UpdateSpellDamageAndHealingBonus();
 
-        void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, float& min_damage, float& max_damage);
+        void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, float& minDamage, float& maxDamage) override;
 
         void UpdateDefenseBonusesMod();
         void ApplyRatingMod(CombatRating cr, int32 value, bool apply);
@@ -1967,6 +1957,9 @@ class Player : public Unit, public GridObject<Player>
         void DestroyForPlayer(Player* target, bool onDeath = false) const override;
         void SendDelayResponse(const uint32);
         void SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP, bool RafBonus = false);
+
+		uint8 LastSwingErrorMsg() const { return m_swingErrorMsg; }
+		void SwingErrorMsg(uint8 val) { m_swingErrorMsg = val; }
 
         //notifiers
         void SendAttackSwingCantAttack();
@@ -2070,10 +2063,7 @@ class Player : public Unit, public GridObject<Player>
         void CheckAreaExploreAndOutdoor(void);
 
         static uint32 TeamForRace(uint8 race);
-        uint32 GetTeam() const
-        {
-            return m_team;
-        }
+        uint32 GetTeam() const { return m_team; }
         TeamId GetTeamId() const
         {
             return m_team == ALLIANCE ? TEAM_ALLIANCE : TEAM_HORDE;
@@ -2113,6 +2103,7 @@ class Player : public Unit, public GridObject<Player>
         }
         void ModifyHonorPoints(int32 value);
         void ModifyArenaPoints(int32 value, bool update = true);
+        uint8 GetHighestPvPRankIndex();
         uint32 GetMaxPersonalArenaRatingRequirement();
 
         //End of PvP System
@@ -2715,7 +2706,8 @@ class Player : public Unit, public GridObject<Player>
         //We allow only one timed quest active at the same time. Below can then be simple value instead of set.
         std::set<uint32> m_timedquests;
 
-        uint64 m_divider;
+        uint64 m_playerSharingQuest;
+        uint32 m_sharedQuestId;
         uint32 m_ingametime;
 
         /*********************************************************/
@@ -2765,6 +2757,7 @@ class Player : public Unit, public GridObject<Player>
         void HandleSobering();
         void SendMirrorTimer(MirrorTimerType Type, uint32 MaxValue, uint32 CurrentValue, int32 Regen);
         void StopMirrorTimer(MirrorTimerType Type);
+        bool HasMirrorTimerFlag(uint32 flag) const { return m_MirrorTimerFlags & flag; }
         void HandleDrowning(uint32 time_diff);
         int32 getMaxTimer(MirrorTimerType timer);
 

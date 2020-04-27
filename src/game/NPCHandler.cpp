@@ -12,7 +12,7 @@
  * more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "Common.h"
@@ -261,7 +261,7 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket& recv_data)
     }
 
     // Set faction visible if needed
-    if (FactionTemplateEntry const* factionTemplateEntry = sFactionTemplateStore.LookupEntry(unit->getFaction()))
+    if (FactionTemplateEntry const* factionTemplateEntry = sFactionTemplateStore.LookupEntry(unit->GetFaction()))
         _player->GetReputationMgr().SetVisible(factionTemplateEntry);
 
     GetPlayer()->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TALK);
@@ -274,7 +274,7 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket& recv_data)
 
 
     // If spiritguide, no need for gossip menu, just put player into resurrect queue
-    if (unit->isSpiritGuide())
+    if (unit->IsSpiritGuide())
     {
         Battleground* bg = _player->GetBattleground();
         if (bg)
@@ -288,7 +288,7 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket& recv_data)
     if (!sScriptMgr.GossipHello(_player, unit))
     {
         _player->TalkedToCreature(unit->GetEntry(), unit->GetGUID());
-        _player->PrepareGossipMenu(unit, unit->GetCreatureTemplate()->GossipMenuId);
+        _player->PrepareGossipMenu(unit, unit->GetCreatureTemplate()->GossipMenuId, true);
         _player->SendPreparedGossip(unit);
     }
     unit->AI()->sGossipHello(_player);
@@ -426,7 +426,7 @@ void WorldSession::SendBindPoint(Creature* npc)
     data << uint32(3286);                                   // Bind
     SendPacket(&data);
 
-    _player->PlayerTalkClass->CloseGossip();
+    _player->PlayerTalkClass->SendCloseGossip();
 }
 
 //Need fix
